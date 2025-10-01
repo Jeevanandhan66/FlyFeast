@@ -43,13 +43,15 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName));
 
-   
-           //Passenger
+
+        //Passenger
 
         CreateMap<Passenger, PassengerDTO>().ReverseMap();
+        CreateMap<Passenger, PassengerRequestDTO>().ReverseMap();
 
 
-           //Aircrafts
+
+        //Aircrafts
 
         CreateMap<Aircraft, AircraftResponseDTO>().ReverseMap();
         CreateMap<AircraftRequestDTO, Aircraft>().ReverseMap();

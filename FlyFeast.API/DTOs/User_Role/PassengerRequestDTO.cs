@@ -1,10 +1,18 @@
-﻿namespace FlyFeast.API.DTOs.User_Role
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FlyFeast.API.DTOs.User_Role
 {
     public class PassengerRequestDTO
     {
+        [Required]
         public string UserId { get; set; } = string.Empty;
-        public string? PassportNumber { get; set; }
-        public string? Nationality { get; set; }
+
         public DateTime? DateOfBirth { get; set; }
+
+        [StringLength(50)]
+        public string? PassportNumber { get; set; }
+
+        [StringLength(50)]
+        public string? Nationality { get; set; }
     }
 }

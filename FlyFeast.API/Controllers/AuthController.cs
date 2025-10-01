@@ -32,39 +32,47 @@ namespace FlyFeast.API.Controllers
             _context = context;
         }
 
-   
+
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<IActionResult> Register(RegisterDto dto)
+        public async Task<IActionResult> Register(RegisterDTO dto)
         {
             try
             {
+                if (dto.Password != dto.ConfirmPassword)
+                    return BadRequest("Passwords do not match");
+
+                // Create base ApplicationUser
                 var user = new ApplicationUser
                 {
                     UserName = dto.Email,
                     Email = dto.Email,
-                    FullName = dto.FullName
+                    FullName = dto.FullName,
+                    Gender = dto.Gender,
+                    Address = dto.Address,
+                    PhoneNumber = dto.PhoneNumber,
+                    IsActive = true
                 };
 
                 var result = await _userManager.CreateAsync(user, dto.Password);
                 if (!result.Succeeded)
                     return BadRequest(result.Errors.Select(e => e.Description));
 
-               
+
                 await _userManager.AddToRoleAsync(user, "Customer");
 
-               
                 var passenger = new Passenger
                 {
                     UserId = user.Id,
-                    PassportNumber = dto.PassportNumber,
-                    Nationality = dto.Nationality
+                    DateOfBirth = null,
+                    PassportNumber = null,
+                    Nationality = null
                 };
 
                 _context.Passengers.Add(passenger);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = "Registration successful" });
+                return Ok(new { message = "Customer registration successful. Please login." });
             }
             catch (Exception ex)
             {
@@ -72,7 +80,8 @@ namespace FlyFeast.API.Controllers
             }
         }
 
-        
+
+
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginDto dto)
@@ -88,11 +97,15 @@ namespace FlyFeast.API.Controllers
                 var roles = await _userManager.GetRolesAsync(user);
                 var token = _tokenService.CreateToken(user, roles);
 
-                return Ok(new
+                var response = new AuthResponseDTO
                 {
-                    token,
-                    expires = DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes)
-                });
+                    Token = token,
+                    Expiration = DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
+                    Role = roles.FirstOrDefault() ?? "Customer",
+                    FullName = user.FullName
+                };
+
+                return Ok(response);
             }
             catch (Exception ex)
             {

@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
-using FlyFeast.API.DTOs;
 using FlyFeast.API.Models;
 using FlyFeast.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using FlyFeast.API.DTOs.Aircraft_Airport;
+
 
 namespace FlyFeast.API.Controllers
 {

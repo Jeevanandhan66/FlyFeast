@@ -37,6 +37,7 @@ namespace FlyFeast.API.Repositories
             var existing = await _context.Airports.FindAsync(id);
             if (existing == null) return null;
 
+            existing.AirportName = airport.AirportName;
             existing.Code = airport.Code;
             existing.City = airport.City;
             existing.Country = airport.Country;

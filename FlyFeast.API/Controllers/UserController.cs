@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FlyFeast.API.DTOs;
+using FlyFeast.API.DTOs.Bookings;
 using FlyFeast.API.DTOs.User_Role;
 using FlyFeast.API.Models;
 using FlyFeast.API.Repositories.Interfaces;

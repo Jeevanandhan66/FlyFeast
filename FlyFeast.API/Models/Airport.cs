@@ -7,6 +7,9 @@ namespace FlyFeast.API.Models
         [Key]
         public int AirportId { get; set; }
 
+        [Required, StringLength(200)]
+        public string AirportName { get; set; } = string.Empty;
+
         [Required, StringLength(10)]
         public string Code { get; set; } = string.Empty;
 
