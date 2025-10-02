@@ -8,10 +8,12 @@ namespace FlyFeast.API.Models
         [Key]
         public int BookingId { get; set; }
 
+        [Required]
         public string UserId { get; set; } = string.Empty;
         [ForeignKey(nameof(UserId))]
         public ApplicationUser? User { get; set; }
 
+        [Required]
         public int ScheduleId { get; set; }
         [ForeignKey(nameof(ScheduleId))]
         public Schedule? Schedule { get; set; }
@@ -22,15 +24,23 @@ namespace FlyFeast.API.Models
         [Required, Range(0, double.MaxValue)]
         public decimal TotalAmount { get; set; }
 
-        [Required, StringLength(20)]
-        [RegularExpression("Pending|Confirmed|Cancelled|Refunded")]
-        public string Status { get; set; } = "Pending";
+        [Required]
+        public BookingStatus Status { get; set; } = BookingStatus.Pending;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        // Navigation properties
         public ICollection<BookingItem>? BookingItems { get; set; }
         public ICollection<Payment>? Payments { get; set; }
         public ICollection<Refund>? Refunds { get; set; }
         public ICollection<BookingCancellation>? BookingCancellations { get; set; }
+    }
+
+    public enum BookingStatus
+    {
+        Pending,
+        Confirmed,
+        Cancelled,
+        Refunded
     }
 }

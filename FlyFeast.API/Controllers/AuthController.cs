@@ -42,7 +42,7 @@ namespace FlyFeast.API.Controllers
                 if (dto.Password != dto.ConfirmPassword)
                     return BadRequest("Passwords do not match");
 
-                // Create base ApplicationUser
+                // Create ApplicationUser
                 var user = new ApplicationUser
                 {
                     UserName = dto.Email,
@@ -58,15 +58,16 @@ namespace FlyFeast.API.Controllers
                 if (!result.Succeeded)
                     return BadRequest(result.Errors.Select(e => e.Description));
 
-
+                // Default all new users to Customer role
                 await _userManager.AddToRoleAsync(user, "Customer");
 
+                // Create Passenger profile
                 var passenger = new Passenger
                 {
                     UserId = user.Id,
-                    DateOfBirth = null,
-                    PassportNumber = null,
-                    Nationality = null
+                    DateOfBirth = dto.DateOfBirth,
+                    PassportNumber = dto.PassportNumber,
+                    Nationality = dto.Nationality
                 };
 
                 _context.Passengers.Add(passenger);
@@ -79,6 +80,7 @@ namespace FlyFeast.API.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+
 
 
 

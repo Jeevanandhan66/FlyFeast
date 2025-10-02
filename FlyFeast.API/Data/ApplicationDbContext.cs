@@ -67,17 +67,31 @@ namespace FlyFeast.API.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
 
+            // Booking ↔ User
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.User)
                 .WithMany()
                 .HasForeignKey(b => b.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Booking ↔ Schedule
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.Schedule)
                 .WithMany(s => s.Bookings)
                 .HasForeignKey(b => b.ScheduleId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // BookingRef unique
+            modelBuilder.Entity<Booking>()
+                .HasIndex(b => b.BookingRef)
+                .IsUnique();
+
+            // Store Status enum as string (if using enum instead of string)
+            modelBuilder.Entity<Booking>()
+                .Property(b => b.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
 
 
             modelBuilder.Entity<BookingItem>()

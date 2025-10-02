@@ -14,9 +14,7 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-
-           //ApplicationUser Mappings
-
+        // -------------------- USERS --------------------
         CreateMap<UserRequestDTO, ApplicationUser>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
@@ -38,79 +36,49 @@ public class MappingProfile : Profile
                     : new List<Passenger>()))
             .ForMember(dest => dest.Roles, opt => opt.Ignore());
 
-
         CreateMap<ApplicationUser, UserSummaryDTO>()
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName));
 
-
-        //Passenger
-
+        // -------------------- PASSENGERS --------------------
         CreateMap<Passenger, PassengerDTO>().ReverseMap();
         CreateMap<Passenger, PassengerRequestDTO>().ReverseMap();
 
-
-
-        //Aircrafts
-
+        // -------------------- AIRCRAFTS --------------------
         CreateMap<Aircraft, AircraftResponseDTO>().ReverseMap();
         CreateMap<AircraftRequestDTO, Aircraft>().ReverseMap();
 
-  
-           //Airports
-
+        // -------------------- AIRPORTS --------------------
         CreateMap<Airport, AirportDTO>().ReverseMap();
 
-
-           //Flight Routes
-
+        // -------------------- FLIGHT ROUTES --------------------
         CreateMap<FlightRoute, RouteResponseDTO>().ReverseMap();
         CreateMap<RouteRequestDTO, FlightRoute>().ReverseMap();
 
-
         // -------------------- SCHEDULES --------------------
-
-        // Entity -> ResponseDTO
         CreateMap<Schedule, ScheduleResponseDTO>()
-            .ForMember(dest => dest.Status,
-                opt => opt.MapFrom(src => src.Status.ToString()))
-            .ForMember(dest => dest.DurationMinutes,
-                opt => opt.MapFrom(src => (int)(src.ArrivalTime - src.DepartureTime).TotalMinutes))
-            .ForMember(dest => dest.DurationFormatted,
-                opt => opt.MapFrom(src => $"{(src.ArrivalTime - src.DepartureTime).Hours}h {(src.ArrivalTime - src.DepartureTime).Minutes}m"));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.DurationMinutes, opt => opt.MapFrom(src => (int)(src.ArrivalTime - src.DepartureTime).TotalMinutes))
+            .ForMember(dest => dest.DurationFormatted, opt => opt.MapFrom(src => $"{(src.ArrivalTime - src.DepartureTime).Hours}h {(src.ArrivalTime - src.DepartureTime).Minutes}m"));
 
-        // ResponseDTO -> Entity
         CreateMap<ScheduleResponseDTO, Schedule>()
-            .ForMember(dest => dest.Status,
-                opt => opt.MapFrom(src => Enum.Parse<ScheduleStatus>(src.Status)));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<ScheduleStatus>(src.Status)));
 
-        // RequestDTO -> Entity
         CreateMap<ScheduleRequestDTO, Schedule>()
-            .ForMember(dest => dest.Status,
-                opt => opt.MapFrom(src => Enum.Parse<ScheduleStatus>(src.Status)));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<ScheduleStatus>(src.Status)));
 
-        // Entity -> RequestDTO
         CreateMap<Schedule, ScheduleRequestDTO>()
-            .ForMember(dest => dest.Status,
-                opt => opt.MapFrom(src => src.Status.ToString()));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
 
-        // Entity -> SummaryDTO
         CreateMap<Schedule, ScheduleSummaryDTO>()
-            .ForMember(dest => dest.Status,
-                opt => opt.MapFrom(src => src.Status.ToString()))
-            .ForMember(dest => dest.DurationMinutes,
-                opt => opt.MapFrom(src => (int)(src.ArrivalTime - src.DepartureTime).TotalMinutes))
-            .ForMember(dest => dest.DurationFormatted,
-                opt => opt.MapFrom(src => $"{(src.ArrivalTime - src.DepartureTime).Hours}h {(src.ArrivalTime - src.DepartureTime).Minutes}m"));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.DurationMinutes, opt => opt.MapFrom(src => (int)(src.ArrivalTime - src.DepartureTime).TotalMinutes))
+            .ForMember(dest => dest.DurationFormatted, opt => opt.MapFrom(src => $"{(src.ArrivalTime - src.DepartureTime).Hours}h {(src.ArrivalTime - src.DepartureTime).Minutes}m"));
 
-        // SummaryDTO -> Entity
         CreateMap<ScheduleSummaryDTO, Schedule>()
-            .ForMember(dest => dest.Status,
-                opt => opt.MapFrom(src => Enum.Parse<ScheduleStatus>(src.Status)));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<ScheduleStatus>(src.Status)));
 
-
-
-        // Seats
+        // -------------------- SEATS --------------------
         CreateMap<Seat, SeatResponseDTO>()
             .ForMember(dest => dest.Schedule, opt => opt.MapFrom(src => src.Schedule));
 
@@ -119,28 +87,35 @@ public class MappingProfile : Profile
 
         CreateMap<SeatRequestDTO, Seat>().ReverseMap();
 
+        // -------------------- BOOKINGS --------------------
+        CreateMap<Booking, BookingResponseDTO>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
+            .ForMember(dest => dest.Schedule, opt => opt.MapFrom(src => src.Schedule))
+            .ForMember(dest => dest.BookingItems, opt => opt.MapFrom(src => src.BookingItems));
 
-        //Bookings & Booking Items
+        CreateMap<BookingRequestDTO, Booking>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<BookingStatus>(src.Status)))
+            .ForMember(dest => dest.BookingRef, opt => opt.Ignore())   // set in service/repo
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());  // set in service/repo
 
-        CreateMap<Booking, BookingResponseDTO>().ReverseMap();
-        CreateMap<BookingRequestDTO, Booking>().ReverseMap();
+        CreateMap<Booking, BookingRequestDTO>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.Seats, opt => opt.Ignore()); // handled separately
+
+        // -------------------- BOOKING ITEMS --------------------
         CreateMap<BookingItem, BookingItemDTO>().ReverseMap();
 
-
-           //Booking Cancellations
-
+        // -------------------- BOOKING CANCELLATIONS --------------------
         CreateMap<BookingCancellation, BookingCancellationDTO>().ReverseMap();
 
-
-           //Payments
-  
+        // -------------------- PAYMENTS --------------------
         CreateMap<PaymentRequestDTO, Payment>()
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId));
 
         CreateMap<Payment, PaymentResponseDTO>().ReverseMap();
 
-
-           //Refunds
+        // -------------------- REFUNDS --------------------
         CreateMap<RefundRequestDTO, Refund>()
             .ForMember(dest => dest.ProcessedById, opt => opt.MapFrom(src => src.ProcessedById));
 

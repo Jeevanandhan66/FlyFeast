@@ -4,7 +4,6 @@ using FlyFeast.API.Models;
 using FlyFeast.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FlyFeast.API.Controllers
 {
@@ -22,6 +21,7 @@ namespace FlyFeast.API.Controllers
             _mapper = mapper;
         }
 
+        // -------------------- GET ALL BOOKINGS --------------------
         [HttpGet]
         [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> GetBookings()
@@ -37,6 +37,7 @@ namespace FlyFeast.API.Controllers
             }
         }
 
+        // -------------------- GET BOOKING BY ID --------------------
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBooking(int id)
         {
@@ -52,6 +53,7 @@ namespace FlyFeast.API.Controllers
             }
         }
 
+        // -------------------- GET BOOKINGS BY USER --------------------
         [HttpGet("byuser/{userId}")]
         public async Task<IActionResult> GetBookingsByUser(string userId)
         {
@@ -66,19 +68,20 @@ namespace FlyFeast.API.Controllers
             }
         }
 
+        // -------------------- CREATE BOOKING --------------------
         [HttpPost]
-        public async Task<IActionResult> CreateBooking(BookingRequestDTO bookingDto)
+        public async Task<IActionResult> CreateBooking([FromBody] BookingRequestDTO bookingDto)
         {
             try
             {
                 if (bookingDto == null || bookingDto.Seats == null || !bookingDto.Seats.Any())
-                    return BadRequest("Invalid booking data.");
+                    return BadRequest("Booking must include at least one seat.");
 
                 var booking = new Booking
                 {
                     UserId = bookingDto.UserId,
                     ScheduleId = bookingDto.ScheduleId,
-                    Status = bookingDto.Status,
+                    Status = BookingStatus.Pending, // always server-controlled
                     CreatedAt = DateTime.UtcNow
                 };
 
@@ -96,12 +99,13 @@ namespace FlyFeast.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = $"Could not create booking: {ex.Message}" });
             }
         }
 
+        // -------------------- UPDATE BOOKING STATUS --------------------
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBooking(int id, BookingRequestDTO bookingDto)
+        public async Task<IActionResult> UpdateBooking(int id, [FromBody] BookingRequestDTO bookingDto)
         {
             try
             {
@@ -113,51 +117,47 @@ namespace FlyFeast.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = $"Could not update booking: {ex.Message}" });
             }
         }
 
+        // -------------------- CANCEL BOOKING --------------------
         [HttpPut("{id}/cancel")]
         [Authorize(Roles = "Admin,Manager,Customer")]
         public async Task<IActionResult> CancelBooking(int id, [FromBody] BookingCancellationDTO cancellationDto)
         {
-            var booking = await _bookingRepository.GetByIdAsync(id);
-            if (booking == null)
-                return NotFound($"Booking with ID {id} not found.");
-
-            if (booking.Status == "Cancelled")
-                return BadRequest("Booking is already cancelled.");
-
-            var cancellation = new BookingCancellation
+            try
             {
-                BookingId = booking.BookingId,
-                CancelledById = cancellationDto.CancelledById,
-                Reason = cancellationDto.Reason,
-                CancelledAt = DateTime.UtcNow
-            };
+                var booking = await _bookingRepository.GetByIdAsync(id);
+                if (booking == null)
+                    return NotFound($"Booking with ID {id} not found.");
 
-            
-            await _bookingRepository.AddCancellationAsync(cancellation);
+                if (booking.Status == BookingStatus.Cancelled)
+                    return BadRequest("Booking is already cancelled.");
 
-            
-            booking.Status = "Cancelled";
-            await _bookingRepository.UpdateAsync(booking.BookingId, booking);
+                var cancellation = new BookingCancellation
+                {
+                    BookingId = booking.BookingId,
+                    Reason = cancellationDto.Reason,
+                    CancelledAt = DateTime.UtcNow
+                };
 
-         
-            await _bookingRepository.ReleaseSeatsAsync(booking.BookingId);
+                await _bookingRepository.AddCancellationAsync(cancellation);
 
-           
-            return Ok(new
+                return Ok(new
+                {
+                    Message = "Booking cancelled successfully.",
+                    cancellation.CancellationId,
+                    cancellation.CancelledAt
+                });
+            }
+            catch (Exception ex)
             {
-                Message = "Booking cancelled successfully.",
-                cancellation.CancellationId,
-                cancellation.CancelledAt
-            });
+                return StatusCode(500, new { error = $"Could not cancel booking: {ex.Message}" });
+            }
         }
 
-
-
-
+        // -------------------- DELETE BOOKING --------------------
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBooking(int id)
@@ -170,7 +170,7 @@ namespace FlyFeast.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = $"Could not delete booking: {ex.Message}" });
             }
         }
     }

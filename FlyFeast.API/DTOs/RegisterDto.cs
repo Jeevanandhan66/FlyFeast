@@ -2,6 +2,7 @@
 
 public class RegisterDTO
 {
+    // ------------------ USER INFO ------------------
     [Required(ErrorMessage = "Email is required.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     public string Email { get; set; } = string.Empty;
@@ -29,4 +30,15 @@ public class RegisterDTO
     [Phone(ErrorMessage = "Invalid phone number.")]
     [StringLength(15, ErrorMessage = "Phone number cannot exceed 15 digits.")]
     public string? PhoneNumber { get; set; }
+
+    // ------------------ PASSENGER INFO ------------------
+    [Required(ErrorMessage = "Passport Number is required.")]
+    [StringLength(50, ErrorMessage = "Passport number cannot exceed 50 characters.")]
+    public string PassportNumber { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Nationality is required.")]
+    [StringLength(50, ErrorMessage = "Nationality cannot exceed 50 characters.")]
+    public string Nationality { get; set; } = string.Empty;
+
+    public DateTime? DateOfBirth { get; set; }
 }

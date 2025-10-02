@@ -15,5 +15,4 @@ namespace FlyFeast.API.DTOs.Bookings
         public ScheduleSummaryDTO Schedule { get; set; } = new();
         public List<BookingItemDTO> BookingItems { get; set; } = new();
     }
-
 }

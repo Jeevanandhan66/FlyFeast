@@ -14,6 +14,7 @@ namespace FlyFeast.API.Repositories
             _context = context;
         }
 
+        // -------------------- GET METHODS --------------------
         public async Task<List<Booking>> GetAllAsync()
         {
             return await _context.Bookings
@@ -50,10 +51,12 @@ namespace FlyFeast.API.Repositories
                 .ToListAsync();
         }
 
+        // -------------------- CREATE --------------------
         public async Task<Booking> AddAsync(Booking booking)
         {
             booking.BookingRef = $"BK-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
             booking.CreatedAt = DateTime.UtcNow;
+            booking.Status = BookingStatus.Pending;
 
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
@@ -65,18 +68,23 @@ namespace FlyFeast.API.Repositories
             booking.BookingRef = $"BK-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
             booking.CreatedAt = DateTime.UtcNow;
 
-            var schedule = await _context.Schedules.FindAsync(booking.ScheduleId);
-            if (schedule == null) throw new Exception("Schedule not found");
+            var schedule = await _context.Schedules
+                .Include(s => s.Seats)
+                .FirstOrDefaultAsync(s => s.ScheduleId == booking.ScheduleId);
+
+            if (schedule == null)
+                throw new Exception("Schedule not found");
 
             decimal totalAmount = 0;
             var bookingItems = new List<BookingItem>();
 
             foreach (var (seatId, passengerId) in seatPassengerPairs)
             {
-                var seat = await _context.Seats
-                    .FirstOrDefaultAsync(s => s.SeatId == seatId && s.ScheduleId == booking.ScheduleId);
-                if (seat == null) throw new Exception($"Seat {seatId} not found for schedule {booking.ScheduleId}");
-                if (seat.IsBooked) throw new Exception($"Seat {seat.SeatNumber} is already booked.");
+                var seat = schedule.Seats?.FirstOrDefault(s => s.SeatId == seatId);
+                if (seat == null)
+                    throw new Exception($"Seat {seatId} not found for schedule {booking.ScheduleId}");
+                if (seat.IsBooked)
+                    throw new Exception($"Seat {seat.SeatNumber} is already booked.");
 
                 seat.IsBooked = true;
 
@@ -92,7 +100,11 @@ namespace FlyFeast.API.Repositories
 
             booking.BookingItems = bookingItems;
             booking.TotalAmount = totalAmount;
-            booking.Status = "Confirmed";
+            booking.Status = BookingStatus.Confirmed;
+
+            // Reduce available seats
+            if (schedule.AvailableSeats.HasValue)
+                schedule.AvailableSeats -= seatPassengerPairs.Count;
 
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
@@ -100,6 +112,7 @@ namespace FlyFeast.API.Repositories
             return booking;
         }
 
+        // -------------------- UPDATE --------------------
         public async Task<Booking?> UpdateAsync(int id, Booking booking)
         {
             var existing = await _context.Bookings.FindAsync(id);
@@ -110,22 +123,42 @@ namespace FlyFeast.API.Repositories
             return existing;
         }
 
+        // -------------------- DELETE --------------------
         public async Task<bool> DeleteAsync(int id)
         {
-            var existing = await _context.Bookings.FindAsync(id);
+            var existing = await _context.Bookings
+                .Include(b => b.BookingItems).ThenInclude(bi => bi.Seat)
+                .FirstOrDefaultAsync(b => b.BookingId == id);
+
             if (existing == null) return false;
+
+            // Release booked seats
+            foreach (var item in existing.BookingItems ?? new List<BookingItem>())
+            {
+                if (item.Seat != null)
+                    item.Seat.IsBooked = false;
+            }
 
             _context.Bookings.Remove(existing);
             await _context.SaveChangesAsync();
             return true;
         }
 
+        // -------------------- CANCELLATION --------------------
         public async Task AddCancellationAsync(BookingCancellation cancellation)
         {
+            var booking = await _context.Bookings.FindAsync(cancellation.BookingId);
+            if (booking == null) throw new Exception("Booking not found");
+
+            booking.Status = BookingStatus.Cancelled;
+
             _context.BookingCancellations.Add(cancellation);
+            await ReleaseSeatsAsync(cancellation.BookingId);
+
             await _context.SaveChangesAsync();
         }
 
+        // -------------------- SEAT RELEASE --------------------
         public async Task ReleaseSeatsAsync(int bookingId)
         {
             var bookingItems = await _context.BookingItems
@@ -136,13 +169,17 @@ namespace FlyFeast.API.Repositories
             foreach (var item in bookingItems)
             {
                 if (item.Seat != null)
-                {
                     item.Seat.IsBooked = false;
-                }
             }
+
+            var schedule = await _context.Schedules
+                .Include(s => s.Seats)
+                .FirstOrDefaultAsync(s => s.Bookings.Any(b => b.BookingId == bookingId));
+
+            if (schedule != null && schedule.AvailableSeats.HasValue)
+                schedule.AvailableSeats += bookingItems.Count;
 
             await _context.SaveChangesAsync();
         }
-
     }
 }
