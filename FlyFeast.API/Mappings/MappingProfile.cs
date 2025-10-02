@@ -68,21 +68,60 @@ public class MappingProfile : Profile
         CreateMap<RouteRequestDTO, FlightRoute>().ReverseMap();
 
 
-           //Schedules
+        // -------------------- SCHEDULES --------------------
 
-        CreateMap<Schedule, ScheduleResponseDTO>().ReverseMap();
-        CreateMap<ScheduleRequestDTO, Schedule>().ReverseMap();
-        CreateMap<Schedule, ScheduleSummaryDTO>().ReverseMap();
+        // Entity -> ResponseDTO
+        CreateMap<Schedule, ScheduleResponseDTO>()
+            .ForMember(dest => dest.Status,
+                opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.DurationMinutes,
+                opt => opt.MapFrom(src => (int)(src.ArrivalTime - src.DepartureTime).TotalMinutes))
+            .ForMember(dest => dest.DurationFormatted,
+                opt => opt.MapFrom(src => $"{(src.ArrivalTime - src.DepartureTime).Hours}h {(src.ArrivalTime - src.DepartureTime).Minutes}m"));
+
+        // ResponseDTO -> Entity
+        CreateMap<ScheduleResponseDTO, Schedule>()
+            .ForMember(dest => dest.Status,
+                opt => opt.MapFrom(src => Enum.Parse<ScheduleStatus>(src.Status)));
+
+        // RequestDTO -> Entity
+        CreateMap<ScheduleRequestDTO, Schedule>()
+            .ForMember(dest => dest.Status,
+                opt => opt.MapFrom(src => Enum.Parse<ScheduleStatus>(src.Status)));
+
+        // Entity -> RequestDTO
+        CreateMap<Schedule, ScheduleRequestDTO>()
+            .ForMember(dest => dest.Status,
+                opt => opt.MapFrom(src => src.Status.ToString()));
+
+        // Entity -> SummaryDTO
+        CreateMap<Schedule, ScheduleSummaryDTO>()
+            .ForMember(dest => dest.Status,
+                opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.DurationMinutes,
+                opt => opt.MapFrom(src => (int)(src.ArrivalTime - src.DepartureTime).TotalMinutes))
+            .ForMember(dest => dest.DurationFormatted,
+                opt => opt.MapFrom(src => $"{(src.ArrivalTime - src.DepartureTime).Hours}h {(src.ArrivalTime - src.DepartureTime).Minutes}m"));
+
+        // SummaryDTO -> Entity
+        CreateMap<ScheduleSummaryDTO, Schedule>()
+            .ForMember(dest => dest.Status,
+                opt => opt.MapFrom(src => Enum.Parse<ScheduleStatus>(src.Status)));
 
 
-           //Seats
 
-        CreateMap<Seat, SeatResponseDTO>().ReverseMap();
+        // Seats
+        CreateMap<Seat, SeatResponseDTO>()
+            .ForMember(dest => dest.Schedule, opt => opt.MapFrom(src => src.Schedule));
+
+        CreateMap<SeatResponseDTO, Seat>()
+            .ForMember(dest => dest.Schedule, opt => opt.Ignore());
+
         CreateMap<SeatRequestDTO, Seat>().ReverseMap();
 
-  
-           //Bookings & Booking Items
- 
+
+        //Bookings & Booking Items
+
         CreateMap<Booking, BookingResponseDTO>().ReverseMap();
         CreateMap<BookingRequestDTO, Booking>().ReverseMap();
         CreateMap<BookingItem, BookingItemDTO>().ReverseMap();

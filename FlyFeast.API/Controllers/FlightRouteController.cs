@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using FlyFeast.API.DTOs;
 using FlyFeast.API.DTOs.Routes;
 using FlyFeast.API.Models;
 using FlyFeast.API.Repositories.Interfaces;
@@ -22,6 +21,7 @@ namespace FlyFeast.API.Controllers
             _mapper = mapper;
         }
 
+        // ---------------- GET ALL ----------------
         [HttpGet]
         public async Task<IActionResult> GetRoutes()
         {
@@ -36,6 +36,7 @@ namespace FlyFeast.API.Controllers
             }
         }
 
+        // ---------------- GET BY ID ----------------
         [HttpGet("{id}")]
         public async Task<IActionResult> GetRoute(int id)
         {
@@ -43,6 +44,7 @@ namespace FlyFeast.API.Controllers
             {
                 var route = await _routeRepository.GetByIdAsync(id);
                 if (route == null) return NotFound();
+
                 return Ok(_mapper.Map<RouteResponseDTO>(route));
             }
             catch (Exception ex)
@@ -51,31 +53,49 @@ namespace FlyFeast.API.Controllers
             }
         }
 
+        // ---------------- CREATE ----------------
         [HttpPost]
-        public async Task<IActionResult> CreateRoute(RouteRequestDTO routeDto)
+        public async Task<IActionResult> CreateRoute([FromBody] RouteRequestDTO routeDto)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
                 var route = _mapper.Map<FlightRoute>(routeDto);
                 var created = await _routeRepository.AddAsync(route);
+
                 return CreatedAtAction(nameof(GetRoute), new { id = created.RouteId },
                                        _mapper.Map<RouteResponseDTO>(created));
             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message }); // business rule violation
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { error = ex.Message });
             }
         }
 
+        // ---------------- UPDATE ----------------
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateRoute(int id, RouteRequestDTO routeDto)
+        public async Task<IActionResult> UpdateRoute(int id, [FromBody] RouteRequestDTO routeDto)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
                 var route = _mapper.Map<FlightRoute>(routeDto);
                 var updated = await _routeRepository.UpdateAsync(id, route);
                 if (updated == null) return NotFound();
+
                 return Ok(_mapper.Map<RouteResponseDTO>(updated));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
@@ -83,6 +103,7 @@ namespace FlyFeast.API.Controllers
             }
         }
 
+        // ---------------- DELETE ----------------
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRoute(int id)
         {
@@ -90,6 +111,7 @@ namespace FlyFeast.API.Controllers
             {
                 var success = await _routeRepository.DeleteAsync(id);
                 if (!success) return NotFound();
+
                 return NoContent();
             }
             catch (Exception ex)

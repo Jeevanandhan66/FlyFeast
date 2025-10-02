@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using FlyFeast.API.DTOs;
 using FlyFeast.API.DTOs.Schedules;
 using FlyFeast.API.Models;
 using FlyFeast.API.Repositories.Interfaces;
@@ -22,13 +21,15 @@ namespace FlyFeast.API.Controllers
             _mapper = mapper;
         }
 
+        // ---------------- GET ALL ----------------
         [HttpGet]
         public async Task<IActionResult> GetSchedules()
         {
             try
             {
                 var schedules = await _scheduleRepository.GetAllAsync();
-                return Ok(_mapper.Map<List<ScheduleResponseDTO>>(schedules));
+                var dtos = _mapper.Map<List<ScheduleResponseDTO>>(schedules);
+                return Ok(dtos);
             }
             catch (Exception ex)
             {
@@ -36,13 +37,15 @@ namespace FlyFeast.API.Controllers
             }
         }
 
+        // ---------------- GET BY ID ----------------
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSchedule(int id)
         {
             try
             {
                 var schedule = await _scheduleRepository.GetByIdAsync(id);
-                if (schedule == null) return NotFound(new { error = $"Schedule with ID {id} not found." });
+                if (schedule == null)
+                    return NotFound(new { error = $"Schedule with ID {id} not found." });
 
                 return Ok(_mapper.Map<ScheduleResponseDTO>(schedule));
             }
@@ -52,6 +55,7 @@ namespace FlyFeast.API.Controllers
             }
         }
 
+        // ---------------- CREATE ----------------
         [HttpPost]
         public async Task<IActionResult> CreateSchedule([FromBody] ScheduleRequestDTO scheduleDto)
         {
@@ -62,7 +66,14 @@ namespace FlyFeast.API.Controllers
             {
                 var schedule = _mapper.Map<Schedule>(scheduleDto);
                 var created = await _scheduleRepository.AddAsync(schedule);
-                return CreatedAtAction(nameof(GetSchedule), new { id = created.ScheduleId }, _mapper.Map<ScheduleResponseDTO>(created));
+
+                return CreatedAtAction(nameof(GetSchedule), new { id = created.ScheduleId },
+                                       _mapper.Map<ScheduleResponseDTO>(created));
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Business rule violation (e.g., invalid times, invalid route/aircraft)
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
@@ -70,6 +81,7 @@ namespace FlyFeast.API.Controllers
             }
         }
 
+        // ---------------- UPDATE ----------------
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSchedule(int id, [FromBody] ScheduleRequestDTO scheduleDto)
         {
@@ -81,9 +93,14 @@ namespace FlyFeast.API.Controllers
                 var schedule = _mapper.Map<Schedule>(scheduleDto);
                 var updated = await _scheduleRepository.UpdateAsync(id, schedule);
 
-                if (updated == null) return NotFound(new { error = $"Schedule with ID {id} not found." });
+                if (updated == null)
+                    return NotFound(new { error = $"Schedule with ID {id} not found." });
 
                 return Ok(_mapper.Map<ScheduleResponseDTO>(updated));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
@@ -91,13 +108,15 @@ namespace FlyFeast.API.Controllers
             }
         }
 
+        // ---------------- DELETE ----------------
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSchedule(int id)
         {
             try
             {
                 var success = await _scheduleRepository.DeleteAsync(id);
-                if (!success) return NotFound(new { error = $"Schedule with ID {id} not found." });
+                if (!success)
+                    return NotFound(new { error = $"Schedule with ID {id} not found." });
 
                 return NoContent();
             }

@@ -1,4 +1,5 @@
 ﻿using FlyFeast.API.DTOs.Aircraft_Airport;
+using FlyFeast.API.DTOs.Schedules;
 using FlyFeast.API.DTOs.Seats;
 
 namespace FlyFeast.API.DTOs.Bookings

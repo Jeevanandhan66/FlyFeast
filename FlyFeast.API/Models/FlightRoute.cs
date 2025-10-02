@@ -8,20 +8,21 @@ namespace FlyFeast.API.Models
         [Key]
         public int RouteId { get; set; }
 
+        [Required]
         public int AircraftId { get; set; }
-
         [ForeignKey(nameof(AircraftId))]
         public Aircraft? Aircraft { get; set; }
 
+        [Required]
         public int OriginAirportId { get; set; }
-
         [ForeignKey(nameof(OriginAirportId))]
         public Airport? OriginAirport { get; set; }
 
+        [Required]
         public int DestinationAirportId { get; set; }
-
         [ForeignKey(nameof(DestinationAirportId))]
         public Airport? DestinationAirport { get; set; }
+
 
         [Required, Range(0, double.MaxValue)]
         public decimal BaseFare { get; set; }

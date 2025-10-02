@@ -45,14 +45,11 @@ namespace FlyFeast.API.Repositories
                 throw new InvalidOperationException($"Seat {seat.SeatNumber} already exists in this schedule.");
 
             _context.Seats.Add(seat);
-
-            var schedule = await _context.Schedules.FindAsync(seat.ScheduleId);
-            if (schedule != null)
-            {
-                schedule.AvailableSeats = (schedule.AvailableSeats ?? schedule.SeatCapacity) + 1;
-            }
-
             await _context.SaveChangesAsync();
+
+            // recalc available seats
+            await UpdateAvailableSeats(seat.ScheduleId);
+
             return seat;
         }
 
@@ -61,6 +58,12 @@ namespace FlyFeast.API.Repositories
             var existing = await _context.Seats.FindAsync(id);
             if (existing == null) return null;
 
+            // prevent duplicate seat number
+            bool exists = await _context.Seats
+                .AnyAsync(s => s.ScheduleId == seat.ScheduleId && s.SeatNumber == seat.SeatNumber && s.SeatId != id);
+            if (exists)
+                throw new InvalidOperationException($"Seat {seat.SeatNumber} already exists in this schedule.");
+
             existing.SeatNumber = seat.SeatNumber;
             existing.Class = seat.Class;
             existing.Price = seat.Price;
@@ -68,6 +71,9 @@ namespace FlyFeast.API.Repositories
             existing.ScheduleId = seat.ScheduleId;
 
             await _context.SaveChangesAsync();
+
+            await UpdateAvailableSeats(existing.ScheduleId);
+
             return existing;
         }
 
@@ -76,16 +82,26 @@ namespace FlyFeast.API.Repositories
             var existing = await _context.Seats.FindAsync(id);
             if (existing == null) return false;
 
+            int scheduleId = existing.ScheduleId;
+
             _context.Seats.Remove(existing);
-
-            var schedule = await _context.Schedules.FindAsync(existing.ScheduleId);
-            if (schedule != null && schedule.AvailableSeats > 0)
-            {
-                schedule.AvailableSeats -= 1;
-            }
-
             await _context.SaveChangesAsync();
+
+            await UpdateAvailableSeats(scheduleId);
+
             return true;
+        }
+
+        private async Task UpdateAvailableSeats(int scheduleId)
+        {
+            var schedule = await _context.Schedules.FindAsync(scheduleId);
+            if (schedule != null)
+            {
+                schedule.AvailableSeats = await _context.Seats
+                    .CountAsync(s => s.ScheduleId == scheduleId && !s.IsBooked);
+
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

@@ -57,10 +57,15 @@ namespace FlyFeast.API.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Seat>()
+                .Property(s => s.Class)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Seat>()
                 .HasOne(s => s.Schedule)
                 .WithMany(sc => sc.Seats)
                 .HasForeignKey(s => s.ScheduleId)
                 .OnDelete(DeleteBehavior.Cascade);
+
 
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.User)

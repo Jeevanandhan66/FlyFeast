@@ -17,6 +17,7 @@ namespace FlyFeast.API.Repositories
         public async Task<List<FlightRoute>> GetAllAsync()
         {
             return await _context.Routes
+                .AsNoTracking()
                 .Include(r => r.Aircraft)
                     .ThenInclude(a => a.Owner)
                 .Include(r => r.OriginAirport)
@@ -27,6 +28,7 @@ namespace FlyFeast.API.Repositories
         public async Task<FlightRoute?> GetByIdAsync(int id)
         {
             return await _context.Routes
+                .AsNoTracking()
                 .Include(r => r.Aircraft)
                     .ThenInclude(a => a.Owner)
                 .Include(r => r.OriginAirport)
@@ -36,9 +38,16 @@ namespace FlyFeast.API.Repositories
 
         public async Task<FlightRoute> AddAsync(FlightRoute route)
         {
+            if (route.OriginAirportId == route.DestinationAirportId)
+                throw new InvalidOperationException("Origin and destination airports cannot be the same.");
+
+            if (route.BaseFare <= 0)
+                throw new InvalidOperationException("Base fare must be greater than zero.");
+
             _context.Routes.Add(route);
             await _context.SaveChangesAsync();
 
+            // Load related entities
             await _context.Entry(route).Reference(r => r.Aircraft).LoadAsync();
             await _context.Entry(route).Reference(r => r.OriginAirport).LoadAsync();
             await _context.Entry(route).Reference(r => r.DestinationAirport).LoadAsync();
@@ -54,12 +63,27 @@ namespace FlyFeast.API.Repositories
             var existing = await _context.Routes.FindAsync(id);
             if (existing == null) return null;
 
+            if (route.OriginAirportId == route.DestinationAirportId)
+                throw new InvalidOperationException("Origin and destination airports cannot be the same.");
+
+            if (route.BaseFare <= 0)
+                throw new InvalidOperationException("Base fare must be greater than zero.");
+
             existing.AircraftId = route.AircraftId;
             existing.OriginAirportId = route.OriginAirportId;
             existing.DestinationAirportId = route.DestinationAirportId;
             existing.BaseFare = route.BaseFare;
 
             await _context.SaveChangesAsync();
+
+
+            await _context.Entry(existing).Reference(r => r.Aircraft).LoadAsync();
+            await _context.Entry(existing).Reference(r => r.OriginAirport).LoadAsync();
+            await _context.Entry(existing).Reference(r => r.DestinationAirport).LoadAsync();
+
+            if (existing.Aircraft != null)
+                await _context.Entry(existing.Aircraft).Reference(a => a.Owner).LoadAsync();
+
             return existing;
         }
 

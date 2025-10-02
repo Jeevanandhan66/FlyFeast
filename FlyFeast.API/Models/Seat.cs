@@ -7,21 +7,29 @@ namespace FlyFeast.API.Models
     {
         [Key]
         public int SeatId { get; set; }
+
+        [Required]
         public int ScheduleId { get; set; }
 
         [ForeignKey(nameof(ScheduleId))]
         public Schedule? Schedule { get; set; }
 
-        [Required, StringLength(10)]
+        [Required, StringLength(20)]
         public string SeatNumber { get; set; } = string.Empty;
 
-        [Required, StringLength(20)]
-        [RegularExpression("Economy|Business|First")]
-        public string Class { get; set; } = "Economy";
+        [Required]
+        public SeatClass Class { get; set; } = SeatClass.Economy;
 
         [Required, Range(0, double.MaxValue)]
         public decimal Price { get; set; }
 
         public bool IsBooked { get; set; } = false;
+    }
+
+    public enum SeatClass
+    {
+        Economy,
+        Business,
+        First
     }
 }
