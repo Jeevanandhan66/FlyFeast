@@ -91,10 +91,10 @@ namespace FlyFeast.API.Controllers
             try
             {
                 var user = await _userManager.FindByEmailAsync(dto.Email);
-                if (user == null) return Unauthorized("Invalid credentials");
+                if (user == null) return Unauthorized("Invalid Credentials");
 
                 var passwordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
-                if (!passwordValid) return Unauthorized("Invalid credentials");
+                if (!passwordValid) return Unauthorized("Invalid Credentials");
 
                 var roles = await _userManager.GetRolesAsync(user);
                 var token = _tokenService.CreateToken(user, roles);

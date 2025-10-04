@@ -21,10 +21,8 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddScoped<IPasswordHasher<ApplicationUser>, PasswordHasher<ApplicationUser>>();
 
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("myconnection")));
-
 
 builder.Services.AddControllers()
     .AddNewtonsoftJson();
@@ -86,6 +84,17 @@ builder.Services.AddScoped<ISeatRepository, SeatRepository>();
 //Services
 builder.Services.AddScoped<IFlightSearchService, FlightSearchService>();
 
+// CORS Policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+
+        });
+});
+
 // Swagger + JWT support
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -132,9 +141,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
+
 app.Run();
 
 
@@ -147,7 +162,6 @@ static async Task SeedRolesAndAdminAsync(
 
     await context.Database.MigrateAsync();
 
-
     string[] roles = { "Admin", "Manager", "Customer" };
     foreach (var roleName in roles)
     {
@@ -156,7 +170,6 @@ static async Task SeedRolesAndAdminAsync(
             await roleManager.CreateAsync(new IdentityRole(roleName));
         }
     }
-
 
     var adminEmail = "admin@flyfeast.com";
     var adminUser = await userManager.FindByEmailAsync(adminEmail);
