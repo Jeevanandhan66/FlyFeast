@@ -4,6 +4,7 @@ using FlyFeast.API.Data.Repositories;
 using FlyFeast.API.Models;
 using FlyFeast.API.Repositories;
 using FlyFeast.API.Repositories.Interfaces;
+using FlyFeast.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -81,6 +82,9 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IRefundRepository, RefundRepository>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddScoped<ISeatRepository, SeatRepository>();
+
+//Services
+builder.Services.AddScoped<IFlightSearchService, FlightSearchService>();
 
 // Swagger + JWT support
 builder.Services.AddEndpointsApiExplorer();
