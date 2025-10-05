@@ -31,13 +31,13 @@ namespace FlyFeast.API.Repositories
                 .FirstOrDefaultAsync(p => p.PassengerId == id);
         }
 
-        public async Task<List<Passenger>> GetByUserIdAsync(string userId)
+        public async Task<Passenger?> GetPassengerByUserId(string userId)
         {
             return await _context.Passengers
-                .Where(p => p.UserId == userId)
                 .Include(p => p.User)
-                .ToListAsync();
+                .FirstOrDefaultAsync(p => p.UserId == userId);
         }
+
 
         public async Task<Passenger> AddAsync(Passenger passenger)
         {

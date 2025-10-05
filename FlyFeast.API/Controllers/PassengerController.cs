@@ -39,6 +39,20 @@ namespace FlyFeast.API.Controllers
             return Ok(dto);
         }
 
+        [HttpGet("user/{userId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPassengerByUserId(string userId)
+        {
+            var passenger = await _passengerRepository.GetPassengerByUserId(userId);
+            if (passenger == null)
+                return NotFound(new { message = "Passenger not found for this user." });
+
+            var dto = _mapper.Map<PassengerDTO>(passenger);
+            return Ok(dto);
+        }
+
+
+
         [HttpPost]
         public async Task<IActionResult> CreatePassenger([FromBody] PassengerRequestDTO passengerDto)
         {

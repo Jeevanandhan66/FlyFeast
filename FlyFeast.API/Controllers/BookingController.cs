@@ -94,8 +94,8 @@ namespace FlyFeast.API.Controllers
                 var fullBooking = await _bookingRepository.GetByIdAsync(createdBooking.BookingId);
                 if (fullBooking == null) return NotFound("Booking not found after creation.");
 
-                return CreatedAtAction(nameof(GetBooking), new { id = fullBooking.BookingId },
-                                       _mapper.Map<BookingResponseDTO>(fullBooking));
+                return Ok(_mapper.Map<BookingResponseDTO>(fullBooking));
+
             }
             catch (Exception ex)
             {

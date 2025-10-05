@@ -1,18 +1,16 @@
 ﻿using FlyFeast.API.DTOs.Aircraft_Airport;
+using FlyFeast.API.DTOs.Bookings;
 using FlyFeast.API.DTOs.Schedules;
-using FlyFeast.API.DTOs.Seats;
 
-namespace FlyFeast.API.DTOs.Bookings
+public class BookingResponseDTO
 {
-    public class BookingResponseDTO
-    {
-        public int BookingId { get; set; }
-        public string BookingRef { get; set; } = string.Empty;
-        public string Status { get; set; } = "Pending";
-        public decimal TotalAmount { get; set; }
+    public int BookingId { get; set; }
+    public string BookingRef { get; set; } = string.Empty;
+    public string Status { get; set; } = "Pending";
+    public decimal TotalAmount { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-        public UserSummaryDTO User { get; set; } = new();
-        public ScheduleSummaryDTO Schedule { get; set; } = new();
-        public List<BookingItemDTO> BookingItems { get; set; } = new();
-    }
+    public UserSummaryDTO User { get; set; } = new();
+    public ScheduleSummaryDTO Schedule { get; set; } = new();
+    public List<BookingItemDTO> BookingItems { get; set; } = new();
 }

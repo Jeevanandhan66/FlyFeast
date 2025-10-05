@@ -105,7 +105,8 @@ namespace FlyFeast.API.Controllers
                     Expiration = DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
                     Role = roles.FirstOrDefault() ?? "Customer",
                     FullName = user.FullName,
-                    Email = user.Email
+                    Email = user.Email,
+                    UserId = user.Id
                 };
 
                 return Ok(response);

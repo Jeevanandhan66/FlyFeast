@@ -41,8 +41,15 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName));
 
         // -------------------- PASSENGERS --------------------
-        CreateMap<Passenger, PassengerDTO>().ReverseMap();
-        CreateMap<Passenger, PassengerRequestDTO>().ReverseMap();
+        // Passenger → PassengerDTO
+        CreateMap<Passenger, PassengerDTO>()
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.FullName))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+            .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.User.Gender))
+            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.User.Address));
+
+        // PassengerRequestDTO → Passenger (for POST/PUT)
+        CreateMap<PassengerRequestDTO, Passenger>();
 
         // -------------------- AIRCRAFTS --------------------
         CreateMap<Aircraft, AircraftResponseDTO>().ReverseMap();
@@ -92,22 +99,25 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
             .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
             .ForMember(dest => dest.Schedule, opt => opt.MapFrom(src => src.Schedule))
-            .ForMember(dest => dest.BookingItems, opt => opt.MapFrom(src => src.BookingItems));
+            .ForMember(dest => dest.BookingItems, opt => opt.MapFrom(src => src.BookingItems))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))   
+            .ForMember(dest => dest.BookingRef, opt => opt.MapFrom(src => src.BookingRef)); 
 
         CreateMap<BookingRequestDTO, Booking>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<BookingStatus>(src.Status)))
-            .ForMember(dest => dest.BookingRef, opt => opt.Ignore())   // set in service/repo
-            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());  // set in service/repo
+            .ForMember(dest => dest.BookingRef, opt => opt.Ignore()) 
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
 
         CreateMap<Booking, BookingRequestDTO>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
-            .ForMember(dest => dest.Seats, opt => opt.Ignore()); // handled separately
+            .ForMember(dest => dest.Seats, opt => opt.Ignore());
 
         // -------------------- BOOKING ITEMS --------------------
         CreateMap<BookingItem, BookingItemDTO>().ReverseMap();
 
         // -------------------- BOOKING CANCELLATIONS --------------------
         CreateMap<BookingCancellation, BookingCancellationDTO>().ReverseMap();
+
 
         // -------------------- PAYMENTS --------------------
         CreateMap<PaymentRequestDTO, Payment>()
