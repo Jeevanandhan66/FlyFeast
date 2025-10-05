@@ -14,16 +14,23 @@ api.interceptors.request.use((config) => {
 });
 
 // Handle errors globally
+// Handle errors globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // token expired → force logout (we’ll improve later)
+    // If it's a 401 but not from /Auth/login → force logout
+    if (
+      error.response?.status === 401 &&
+      !error.config?.url.includes("/Auth/login")
+    ) {
       localStorage.removeItem(import.meta.env.VITE_TOKEN_STORAGE_KEY);
       window.location.href = "/login";
     }
+
     return Promise.reject(error);
   }
 );
+
+
 
 export default api;
