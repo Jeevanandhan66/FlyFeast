@@ -7,29 +7,35 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Restore user on page refresh
   useEffect(() => {
     const token = localStorage.getItem(import.meta.env.VITE_TOKEN_STORAGE_KEY);
     const role = localStorage.getItem("userRole");
     const fullName = localStorage.getItem("userName");
+    const email = localStorage.getItem("userEmail");
 
     if (token && role && fullName) {
-      setUser({ token, role, fullName });
+      setUser({ token, role, fullName, email });
     }
     setLoading(false);
   }, []);
 
+  // Save user on login
   const login = (data) => {
-    const { token, role, fullName } = data;
+    const { token, role, fullName, email } = data;
     localStorage.setItem(import.meta.env.VITE_TOKEN_STORAGE_KEY, token);
     localStorage.setItem("userRole", role);
     localStorage.setItem("userName", fullName);
-    setUser({ token, role, fullName });
+    localStorage.setItem("userEmail", email);
+    setUser({ token, role, fullName, email });
   };
 
+  // Clear user on logout
   const logout = () => {
     localStorage.removeItem(import.meta.env.VITE_TOKEN_STORAGE_KEY);
     localStorage.removeItem("userRole");
     localStorage.removeItem("userName");
+    localStorage.removeItem("userEmail");
     setUser(null);
     toast.info("Logged out successfully.");
     window.location.href = "/login";

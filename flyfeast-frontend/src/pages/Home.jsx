@@ -20,8 +20,9 @@ export default function Home() {
     e.preventDefault();
     // 👉 For now just navigate to /results with query params
     navigate(
-      `/results?origin=${formData.origin}&destination=${formData.destination}&date=${formData.date}&passengers=${formData.passengers}`
-    );
+  `/results?originCity=${formData.origin}&destinationCity=${formData.destination}&date=${formData.date}`
+);
+
   };
 
   return (

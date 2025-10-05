@@ -1,30 +1,36 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getSeatsBySchedule } from "../../services/seatService";
+import { toast } from "react-toastify";
 
 export default function Booking() {
-  const { id } = useParams(); // flight id from URL
+  const { id } = useParams(); // scheduleId
   const navigate = useNavigate();
 
-  // Dummy flight details
-  const flight = {
-    id,
-    airline: "IndiGo",
-    flightNumber: "6E 203",
-    origin: "Chennai",
-    destination: "Delhi",
-    departureTime: "08:30",
-    arrivalTime: "11:15",
-    duration: "2h 45m",
-    price: 4999,
-  };
-
-  // Dummy seats (6x4 grid = 24 seats)
-  const totalSeats = 24;
+  const [seats, setSeats] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [filterClass, setFilterClass] = useState("All");
+
+  useEffect(() => {
+    async function loadSeats() {
+      setLoading(true);
+      try {
+        const data = await getSeatsBySchedule(id);
+        setSeats(data);
+      } catch (err) {
+        toast.error(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadSeats();
+  }, [id]);
 
   const toggleSeat = (seat) => {
-    if (selectedSeats.includes(seat)) {
-      setSelectedSeats(selectedSeats.filter((s) => s !== seat));
+    if (seat.isBooked) return; // can't select booked seats
+    if (selectedSeats.find((s) => s.seatId === seat.seatId)) {
+      setSelectedSeats(selectedSeats.filter((s) => s.seatId !== seat.seatId));
     } else {
       setSelectedSeats([...selectedSeats, seat]);
     }
@@ -32,66 +38,87 @@ export default function Booking() {
 
   const handleProceed = () => {
     if (selectedSeats.length === 0) {
-      alert("Please select at least one seat.");
+      toast.error("Please select at least one seat.");
       return;
     }
-    navigate(`/booking/review`, {
-      state: { flight, seats: selectedSeats },
+    navigate("/booking/review", {
+      state: { scheduleId: id, seats: selectedSeats },
     });
+  };
+
+  const seatColors = {
+    Economy: "bg-green-200 hover:bg-green-300 text-green-900",
+    Business: "bg-yellow-200 hover:bg-yellow-300 text-yellow-900",
+    First: "bg-purple-200 hover:bg-purple-300 text-purple-900",
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-6">
       <div className="max-w-5xl mx-auto space-y-10">
-        {/* Flight Info */}
-        <div className="bg-white shadow-lg rounded-xl p-6">
-          <h1 className="text-2xl font-bold text-blue-600 mb-4">
-            {flight.airline} ({flight.flightNumber})
-          </h1>
-          <p className="text-gray-700">
-            {flight.origin} → {flight.destination}
-          </p>
-          <p className="text-gray-600">
-            {flight.departureTime} - {flight.arrivalTime} ({flight.duration})
-          </p>
-          <p className="text-gray-800 font-semibold mt-2">
-            Base Fare: ₹{flight.price.toLocaleString()}
-          </p>
+        <h1 className="text-2xl font-bold text-blue-600">Select Your Seats</h1>
+
+        {/* Filter */}
+        <div className="flex space-x-4">
+          {["All", "Economy", "Business", "First"].map((cls) => (
+            <button
+              key={cls}
+              onClick={() => setFilterClass(cls)}
+              className={`px-4 py-2 rounded-lg ${
+                filterClass === cls
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 hover:bg-gray-300"
+              }`}
+            >
+              {cls}
+            </button>
+          ))}
         </div>
 
-        {/* Seat Selection */}
-        <div className="bg-white shadow-lg rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Select Your Seats
-          </h2>
-          <div className="grid grid-cols-4 gap-4 max-w-md mx-auto">
-            {[...Array(totalSeats)].map((_, i) => {
-              const seat = i + 1;
-              const isSelected = selectedSeats.includes(seat);
-              return (
-                <button
-                  key={seat}
-                  type="button"
-                  onClick={() => toggleSeat(seat)}
-                  className={`p-4 rounded-lg text-sm font-semibold ${
-                    isSelected
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-blue-100"
-                  }`}
-                >
-                  {seat}
-                </button>
-              );
-            })}
+        {/* Seat Grid */}
+        {loading ? (
+          <p className="text-center text-gray-600">Loading seats...</p>
+        ) : seats.length === 0 ? (
+          <p className="text-center text-gray-600">No seats available.</p>
+        ) : (
+          <div className="grid grid-cols-6 gap-4">
+            {seats
+              .filter((s) => filterClass === "All" || s.class === filterClass)
+              .map((seat) => {
+                const isSelected = selectedSeats.find(
+                  (s) => s.seatId === seat.seatId
+                );
+                return (
+                  <button
+                    key={seat.seatId}
+                    onClick={() => toggleSeat(seat)}
+                    disabled={seat.isBooked}
+                    className={`p-3 rounded-lg font-semibold border transition ${
+                      seat.isBooked
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : isSelected
+                        ? "bg-blue-600 text-white"
+                        : seatColors[seat.class] || "bg-gray-100"
+                    }`}
+                  >
+                    {seat.seatNumber}
+                  </button>
+                );
+              })}
           </div>
-        </div>
+        )}
 
-        {/* Price & Proceed */}
+        {/* Proceed */}
         <div className="bg-white shadow-lg rounded-xl p-6 flex justify-between items-center">
           <div>
-            <p className="text-gray-600">Selected Seats: {selectedSeats.join(", ") || "None"}</p>
+            <p className="text-gray-700">
+              Selected Seats:{" "}
+              <span className="font-medium">
+                {selectedSeats.map((s) => s.seatNumber).join(", ") || "None"}
+              </span>
+            </p>
             <p className="text-lg font-bold text-gray-800">
-              Total: ₹{(flight.price * selectedSeats.length).toLocaleString()}
+              Total: ₹
+              {selectedSeats.reduce((sum, s) => sum + (s.price || 0), 0)}
             </p>
           </div>
           <button

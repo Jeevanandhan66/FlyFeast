@@ -1,37 +1,57 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getScheduleById } from "../../services/scheduleService";
+import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-toastify";
 
 export default function Review() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  // Flight + seats come from state passed in Booking.jsx
-  const { flight, seats } = location.state || {};
+  const { scheduleId, seats } = location.state || {};
+  const [schedule, setSchedule] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // If user comes directly without data, redirect to home
-  if (!flight || !seats) {
-    navigate("/");
-  }
-
-  const [passenger, setPassenger] = useState({
-    fullName: "",
-    gender: "",
-    passportNumber: "",
-    nationality: "",
-  });
-
-  const handleChange = (e) => {
-    setPassenger({ ...passenger, [e.target.name]: e.target.value });
-  };
-
-  const handleProceed = () => {
-    if (!passenger.fullName || !passenger.gender || !passenger.passportNumber) {
-      alert("Please fill in all required fields.");
+  useEffect(() => {
+    if (!scheduleId || !seats) {
+      navigate("/");
       return;
     }
 
+    async function loadSchedule() {
+      setLoading(true);
+      try {
+        const data = await getScheduleById(scheduleId);
+        setSchedule(data);
+      } catch (err) {
+        toast.error(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadSchedule();
+  }, [scheduleId, seats, navigate]);
+
+  if (loading) {
+    return <p className="text-center mt-10">Loading review...</p>;
+  }
+
+  if (!schedule) {
+    return <p className="text-center mt-10">No schedule found.</p>;
+  }
+
+  // calculate fare
+  const totalAmount = seats.reduce((sum, s) => sum + (s.price || schedule.route.baseFare), 0);
+
+  const handleProceed = () => {
     navigate("/booking/payment", {
-      state: { flight, seats, passenger },
+      state: {
+        schedule,
+        seats,
+        user,
+        totalAmount,
+      },
     });
   };
 
@@ -43,85 +63,41 @@ export default function Review() {
           <h1 className="text-2xl font-bold text-blue-600 mb-4">
             Review Your Booking
           </h1>
-          <p className="text-gray-700">
-            {flight.airline} ({flight.flightNumber})
+          <p className="text-gray-700 font-semibold">
+            {schedule.route.aircraft.aircraftName} ({schedule.route.aircraft.aircraftCode})
           </p>
           <p className="text-gray-600">
-            {flight.origin} → {flight.destination}
+            {schedule.route.originAirport.city} ({schedule.route.originAirport.code}) →
+            {schedule.route.destinationAirport.city} ({schedule.route.destinationAirport.code})
           </p>
           <p className="text-gray-600">
-            {flight.departureTime} - {flight.arrivalTime} ({flight.duration})
+            Departure: {new Date(schedule.departureTime).toLocaleString()}
           </p>
-          <p className="mt-2 text-gray-700">
-            Seats Selected: <span className="font-semibold">{seats.join(", ")}</span>
+          <p className="text-gray-600">
+            Arrival: {new Date(schedule.arrivalTime).toLocaleString()}
+          </p>
+          <p className="text-gray-700 mt-2">
+            Seats Selected:{" "}
+            <span className="font-medium">
+              {seats.map((s) => s.seatNumber).join(", ")}
+            </span>
           </p>
           <p className="text-lg font-bold text-gray-800 mt-2">
-            Total Fare: ₹{(flight.price * seats.length).toLocaleString()}
+            Total Fare: ₹{totalAmount}
           </p>
         </div>
 
-        {/* Passenger Details */}
+        {/* Passenger (User) Info */}
         <div className="bg-white shadow-lg rounded-xl p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Passenger Details
+            Passenger Information
           </h2>
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={passenger.fullName}
-                onChange={handleChange}
-                className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Gender *
-              </label>
-              <select
-                name="gender"
-                value={passenger.gender}
-                onChange={handleChange}
-                className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Passport Number *
-              </label>
-              <input
-                type="text"
-                name="passportNumber"
-                value={passenger.passportNumber}
-                onChange={handleChange}
-                className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Nationality
-              </label>
-              <input
-                type="text"
-                name="nationality"
-                value={passenger.nationality}
-                onChange={handleChange}
-                className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </form>
+          <p className="text-gray-700">
+            Name: <span className="font-medium">{user?.fullName}</span>
+          </p>
+          <p className="text-gray-700">
+            Email: <span className="font-medium">{user?.email}</span>
+          </p>
         </div>
 
         {/* Proceed Button */}
