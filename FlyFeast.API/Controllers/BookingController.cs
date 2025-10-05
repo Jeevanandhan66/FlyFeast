@@ -138,9 +138,11 @@ namespace FlyFeast.API.Controllers
                 var cancellation = new BookingCancellation
                 {
                     BookingId = booking.BookingId,
-                    Reason = cancellationDto.Reason,
+                    CancelledById = cancellationDto.CancelledById ?? User.FindFirst("sub")?.Value ?? "system",
+                    Reason = cancellationDto.Reason ?? "Cancelled by user",
                     CancelledAt = DateTime.UtcNow
                 };
+
 
                 await _bookingRepository.AddCancellationAsync(cancellation);
 

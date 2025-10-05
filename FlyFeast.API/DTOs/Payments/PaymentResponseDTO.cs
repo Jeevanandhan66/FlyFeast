@@ -12,6 +12,4 @@ namespace FlyFeast.API.DTOs.Payments
         public string Status { get; set; } = "Initiated";
         public DateTime CreatedAt { get; set; }
     }
-
-
 }
