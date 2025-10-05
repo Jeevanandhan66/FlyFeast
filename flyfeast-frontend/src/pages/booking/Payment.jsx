@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
 import { getPassengerByUser, createBooking } from "../../services/bookingService";
+import api from "../../services/apiClient";
 import { toast } from "react-toastify";
 
 export default function Payment() {
@@ -50,6 +51,7 @@ export default function Payment() {
 
     setProcessing(true);
     try {
+      // Step 1: Create booking
       const payload = {
         userId: user.userId,
         scheduleId: schedule.scheduleId,
@@ -58,17 +60,27 @@ export default function Payment() {
           seatId: s.seatId,
           passengerId: passenger.passengerId,
         })),
-        status: "Confirmed", // you may later extend with "Pending/Confirmed"
+        status: "Confirmed",
       };
 
       const booking = await createBooking(payload);
 
+      // Step 2: Save payment in DB
+      const paymentRes = await api.post("/Payment", {
+        BookingId: booking.bookingId,
+        Amount: booking.totalAmount,
+        Provider: "Card", // or "Visa", "MasterCard", etc
+        UserId: user.userId, // from AuthContext
+      });
+
       toast.success("Payment successful! Booking confirmed.");
+
+      // Step 3: Go to confirmation
       navigate("/booking/confirmation", {
-        state: { booking, schedule, seats, passenger },
+        state: { booking, schedule, seats, passenger, payment: paymentRes.data },
       });
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message || "Payment failed.");
     } finally {
       setProcessing(false);
     }
@@ -86,7 +98,7 @@ export default function Payment() {
         {/* Booking Summary */}
         <div className="mb-6">
           <p className="font-semibold text-gray-700">
-            {schedule.route.originAirport.city} ({schedule.route.originAirport.code}) →
+            {schedule.route.originAirport.city} ({schedule.route.originAirport.code}) →{" "}
             {schedule.route.destinationAirport.city} ({schedule.route.destinationAirport.code})
           </p>
           <p className="text-gray-600">
@@ -103,9 +115,7 @@ export default function Payment() {
         {/* Passenger Info */}
         {passenger && (
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">
-              Passenger
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">Passenger</h2>
             <p className="text-gray-700">{passenger.fullName}</p>
             <p className="text-gray-600">{passenger.email}</p>
             <p className="text-gray-600">Passport: {passenger.passportNumber}</p>

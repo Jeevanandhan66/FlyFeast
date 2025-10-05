@@ -184,10 +184,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Footer
       <footer className="bg-blue-600 text-white text-center py-6 mt-auto">
-        <p>© {new Date().getFullYear()} FlyFeast. All rights reserved.</p>
-      </footer>
+        <p>© {new Date().getFullYear()} FlyFeast. Alssl rights reserved.</p>
+      </footer> */}
     </div>
   );
 }

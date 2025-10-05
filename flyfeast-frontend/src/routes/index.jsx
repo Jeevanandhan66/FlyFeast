@@ -4,6 +4,8 @@ import { createBrowserRouter } from "react-router-dom";
 import AppLayout from "../layouts/AppLayout";
 import AuthLayout from "../layouts/AuthLayout";
 import AdminLayout from "../layouts/AdminLayout";
+import UserLayout from "../layouts/UserLayout";
+
 
 // Pages
 import Home from "../pages/Home";
@@ -16,6 +18,7 @@ import Payment from "../pages/booking/Payment";
 import Confirmation from "../pages/booking/Confirmation";
 import Bookings from "../pages/user/Bookings";
 import BookingDetail from "../pages/user/BookingDetail";
+import Profile from "../pages/user/Profile";
 
 import NotFound from "../pages/errors/NotFound";
 import Unauthorized from "../pages/errors/Unauthorized";
@@ -50,6 +53,19 @@ const router = createBrowserRouter([
       { path: "register", element: <Register /> },
     ],
   },
+
+  //User Routes
+
+  {
+  path: "/user",
+  element: <UserLayout />,
+  children: [
+    { path: "profile", element: <Profile /> },
+    { path: "bookings", element: <Bookings /> },
+    { path: "bookings/:id", element: <BookingDetail /> },
+  ],
+},
+
 
   // Admin protected routes
   // {

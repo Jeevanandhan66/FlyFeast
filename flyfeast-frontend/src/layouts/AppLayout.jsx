@@ -28,6 +28,9 @@ export default function AppLayout() {
 
             {user ? (
               <>
+                <Link to="/user/profile" className="hover:underline">
+                  Profile
+                </Link>
                 <span className="text-gray-800 font-medium">
                   Welcome, {user.fullName}
                 </span>
