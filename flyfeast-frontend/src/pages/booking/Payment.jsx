@@ -1,140 +1,165 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useState, useEffect } from "react";
+import { getPassengerByUser, createBooking } from "../../services/bookingService";
+import { toast } from "react-toastify";
 
 export default function Payment() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  // booking info from Review.jsx
-  const { flight, seats, passenger } = location.state || {};
+  const { schedule, seats, totalAmount } = location.state || {};
 
-  if (!flight || !seats || !passenger) {
-    navigate("/");
-  }
+  const [passenger, setPassenger] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [card, setCard] = useState({ number: "", expiry: "", cvv: "" });
+  const [processing, setProcessing] = useState(false);
 
-  const [paymentData, setPaymentData] = useState({
-    cardNumber: "",
-    expiry: "",
-    cvv: "",
-    nameOnCard: "",
-  });
-
-  const handleChange = (e) => {
-    setPaymentData({ ...paymentData, [e.target.name]: e.target.value });
-  };
-
-  const handlePay = (e) => {
-    e.preventDefault();
-
-    if (
-      !paymentData.cardNumber ||
-      !paymentData.expiry ||
-      !paymentData.cvv ||
-      !paymentData.nameOnCard
-    ) {
-      alert("Please fill in all payment fields.");
+  useEffect(() => {
+    if (!user?.token || !user?.role || !schedule || !seats) {
+      navigate("/");
       return;
     }
 
-    // For now simulate success
-    navigate("/booking/confirmation", {
-      state: { flight, seats, passenger, payment: paymentData },
-    });
+    async function fetchPassenger() {
+      try {
+        const data = await getPassengerByUser(user.userId);
+        setPassenger(data);
+      } catch (err) {
+        toast.error(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPassenger();
+  }, [user, schedule, seats, navigate]);
+
+  const handlePay = async (e) => {
+    e.preventDefault();
+    if (!card.number || !card.expiry || !card.cvv) {
+      toast.error("Please fill in all payment details.");
+      return;
+    }
+
+    if (!passenger) {
+      toast.error("Passenger details not found.");
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const payload = {
+        userId: user.userId,
+        scheduleId: schedule.scheduleId,
+        totalAmount,
+        seats: seats.map((s) => ({
+          seatId: s.seatId,
+          passengerId: passenger.passengerId,
+        })),
+        status: "Confirmed", // you may later extend with "Pending/Confirmed"
+      };
+
+      const booking = await createBooking(payload);
+
+      toast.success("Payment successful! Booking confirmed.");
+      navigate("/booking/confirmation", {
+        state: { booking, schedule, seats, passenger },
+      });
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setProcessing(false);
+    }
   };
+
+  if (loading) {
+    return <p className="text-center mt-10">Loading payment page...</p>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-6">
-      <div className="max-w-3xl mx-auto space-y-10">
+      <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+        <h1 className="text-2xl font-bold text-blue-600 mb-6">Payment</h1>
+
         {/* Booking Summary */}
-        <div className="bg-white shadow-lg rounded-xl p-6">
-          <h1 className="text-2xl font-bold text-blue-600 mb-4">
-            Payment Details
-          </h1>
-          <p className="text-gray-700">
-            {flight.airline} ({flight.flightNumber})
+        <div className="mb-6">
+          <p className="font-semibold text-gray-700">
+            {schedule.route.originAirport.city} ({schedule.route.originAirport.code}) →
+            {schedule.route.destinationAirport.city} ({schedule.route.destinationAirport.code})
           </p>
           <p className="text-gray-600">
-            {flight.origin} → {flight.destination}
+            Departure: {new Date(schedule.departureTime).toLocaleString()}
           </p>
           <p className="text-gray-600">
-            Seats: {seats.join(", ")} | Passenger: {passenger.fullName}
+            Seats: {seats.map((s) => s.seatNumber).join(", ")}
           </p>
           <p className="text-lg font-bold text-gray-800 mt-2">
-            Total: ₹{(flight.price * seats.length).toLocaleString()}
+            Total: ₹{totalAmount}
           </p>
         </div>
 
+        {/* Passenger Info */}
+        {passenger && (
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              Passenger
+            </h2>
+            <p className="text-gray-700">{passenger.fullName}</p>
+            <p className="text-gray-600">{passenger.email}</p>
+            <p className="text-gray-600">Passport: {passenger.passportNumber}</p>
+          </div>
+        )}
+
         {/* Payment Form */}
-        <div className="bg-white shadow-lg rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Enter Card Information
-          </h2>
-          <form onSubmit={handlePay} className="space-y-5">
-            <div>
+        <form onSubmit={handlePay} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Card Number
+            </label>
+            <input
+              type="text"
+              value={card.number}
+              onChange={(e) => setCard({ ...card, number: e.target.value })}
+              className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="1234 5678 9012 3456"
+            />
+          </div>
+          <div className="flex space-x-4">
+            <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700">
-                Card Number
+                Expiry
               </label>
               <input
                 type="text"
-                name="cardNumber"
-                value={paymentData.cardNumber}
-                onChange={handleChange}
-                placeholder="1234 5678 9012 3456"
-                className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+                value={card.expiry}
+                onChange={(e) => setCard({ ...card, expiry: e.target.value })}
+                className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="MM/YY"
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Expiry Date
-                </label>
-                <input
-                  type="text"
-                  name="expiry"
-                  value={paymentData.expiry}
-                  onChange={handleChange}
-                  placeholder="MM/YY"
-                  className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  CVV
-                </label>
-                <input
-                  type="password"
-                  name="cvv"
-                  value={paymentData.cvv}
-                  onChange={handleChange}
-                  placeholder="123"
-                  className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div>
+            <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700">
-                Name on Card
+                CVV
               </label>
               <input
-                type="text"
-                name="nameOnCard"
-                value={paymentData.nameOnCard}
-                onChange={handleChange}
-                placeholder="John Doe"
-                className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+                type="password"
+                value={card.cvv}
+                onChange={(e) => setCard({ ...card, cvv: e.target.value })}
+                className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="***"
               />
             </div>
-
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-            >
-              Pay Now
-            </button>
-          </form>
-        </div>
+          </div>
+          <button
+            type="submit"
+            disabled={processing}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+          >
+            {processing ? "Processing..." : "Pay Now"}
+          </button>
+        </form>
       </div>
     </div>
   );

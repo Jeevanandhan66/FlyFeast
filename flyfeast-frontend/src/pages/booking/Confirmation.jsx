@@ -3,96 +3,109 @@ import { useLocation, useNavigate } from "react-router-dom";
 export default function Confirmation() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { booking, schedule, seats, passenger } = location.state || {};
 
-  // booking info from Payment.jsx
-  const { flight, seats, passenger, payment } = location.state || {};
-
-  if (!flight || !seats || !passenger) {
-    navigate("/");
+  if (!booking) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <h1 className="text-2xl font-bold text-red-600">
+          No booking data found
+        </h1>
+        <button
+          onClick={() => navigate("/")}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
+        >
+          Go Home
+        </button>
+      </div>
+    );
   }
 
-  // Dummy booking reference
-  const bookingRef = "FF" + Math.floor(100000 + Math.random() * 900000);
-
-  const handleMyBookings = () => {
-    navigate("/user/bookings");
-  };
-
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-6">
-      <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl p-8">
-        {/* Header */}
-        <div className="text-center border-b pb-6">
-          <h1 className="text-3xl font-bold text-blue-600">FlyFeast E-Ticket</h1>
-          <p className="text-gray-600 mt-2">Booking Confirmation</p>
-          <p className="text-lg font-semibold text-gray-800 mt-2">
-            Booking Ref: <span className="text-blue-600">{bookingRef}</span>
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-50 py-10 px-6 flex justify-center">
+      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-3xl">
+        <h1 className="text-3xl font-bold text-green-600 mb-6 text-center">
+          🎉 Booking Confirmed!
+        </h1>
 
-        {/* Flight Details */}
-        <div className="mt-6 border-b pb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-3">
-            Flight Details
-          </h2>
+        {/* Booking Info */}
+        <div className="mb-6">
+          <p className="text-gray-700 font-semibold">
+            Booking Reference:{" "}
+            <span className="text-blue-600">{booking.bookingRef}</span>
+          </p>
           <p className="text-gray-700">
-            <span className="font-bold">{flight.airline}</span> ({flight.flightNumber})
-          </p>
-          <p className="text-gray-600">
-            {flight.origin} → {flight.destination}
-          </p>
-          <p className="text-gray-600">
-            Departure: {flight.departureTime} | Arrival: {flight.arrivalTime}
-          </p>
-          <p className="text-gray-600">Duration: {flight.duration}</p>
-        </div>
-
-        {/* Passenger Info */}
-        <div className="mt-6 border-b pb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-3">
-            Passenger Details
-          </h2>
-          <p className="text-gray-700">
-            Name: <span className="font-medium">{passenger.fullName}</span>
-          </p>
-          <p className="text-gray-700">Gender: {passenger.gender}</p>
-          <p className="text-gray-700">Passport: {passenger.passportNumber}</p>
-          <p className="text-gray-700">Nationality: {passenger.nationality}</p>
-          <p className="text-gray-700 mt-2">
-            Seats: <span className="font-medium">{seats.join(", ")}</span>
-          </p>
-        </div>
-
-        {/* Payment Info */}
-        <div className="mt-6 border-b pb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-3">
-            Payment Summary
-          </h2>
-          <p className="text-gray-700">
-            Paid with Card ending in{" "}
-            <span className="font-medium">
-              {payment?.cardNumber.slice(-4) || "XXXX"}
+            Status:{" "}
+            <span className="font-medium text-green-600">
+              {booking.status}
             </span>
           </p>
-          <p className="text-lg font-bold text-gray-800 mt-2">
-            Total Paid: ₹{(flight.price * seats.length).toLocaleString()}
+          <p className="text-gray-700">
+            Total Paid:{" "}
+            <span className="font-medium">₹{booking.totalAmount}</span>
           </p>
-          <p className="text-green-600 font-semibold mt-1">Status: Confirmed</p>
+          <p className="text-gray-700">
+            Booked At:{" "}
+            {booking.createdAt
+              ? new Date(booking.createdAt).toLocaleString()
+              : "N/A"}
+          </p>
         </div>
 
-        {/* Actions */}
-        <div className="mt-8 flex justify-between">
+        {/* Flight Info */}
+        {schedule && (
+          <div className="mb-6 border-t pt-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              Flight Details
+            </h2>
+            <p>
+              {schedule.route.originAirport.city} (
+              {schedule.route.originAirport.code}) →{" "}
+              {schedule.route.destinationAirport.city} (
+              {schedule.route.destinationAirport.code})
+            </p>
+            <p>
+              Departure: {new Date(schedule.departureTime).toLocaleString()}
+            </p>
+            <p>
+              Arrival: {new Date(schedule.arrivalTime).toLocaleString()}
+            </p>
+            <p>
+              Aircraft: {schedule.route.aircraft.aircraftName} (
+              {schedule.route.aircraft.aircraftCode})
+            </p>
+          </div>
+        )}
+
+        {/* Passenger Info */}
+        {passenger && (
+          <div className="mb-6 border-t pt-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              Passenger Information
+            </h2>
+            <p>{passenger.fullName}</p>
+            <p>{passenger.email}</p>
+            <p>
+              {passenger.passportNumber} — {passenger.nationality}
+            </p>
+          </div>
+        )}
+
+        {/* Seats */}
+        {seats && seats.length > 0 && (
+          <div className="mb-6 border-t pt-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">Seats</h2>
+            <p>{seats.map((s) => s.seatNumber).join(", ")}</p>
+          </div>
+        )}
+
+        {/* CTA */}
+        <div className="text-center">
           <button
-            onClick={() => window.print()}
-            className="px-6 py-3 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
-          >
-            Download Ticket
-          </button>
-          <button
-            onClick={handleMyBookings}
+            onClick={() => navigate("/user/bookings")}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-            Go to My Bookings
+            View My Bookings
           </button>
         </div>
       </div>

@@ -1,124 +1,68 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import api from "../../services/apiClient";
+import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function Bookings() {
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Dummy data for now (later fetch from API)
   useEffect(() => {
-    setLoading(true);
+    async function fetchBookings() {
+      try {
+        const res = await api.get(`/Booking/byuser/${user.userId}`);
+        setBookings(res.data);
+      } catch (err) {
+        toast.error("Failed to load bookings.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (user?.userId) fetchBookings();
+  }, [user]);
 
-    const dummyBookings = [
-      {
-        id: "FF123456",
-        airline: "IndiGo",
-        flightNumber: "6E 203",
-        origin: "Chennai",
-        destination: "Delhi",
-        departureTime: "2025-10-10T08:30",
-        arrivalTime: "2025-10-10T11:15",
-        passenger: "John Doe",
-        seat: "12A",
-        status: "Confirmed",
-        price: 4999,
-      },
-      {
-        id: "FF789012",
-        airline: "Air India",
-        flightNumber: "AI 101",
-        origin: "Mumbai",
-        destination: "Bangalore",
-        departureTime: "2025-11-05T14:00",
-        arrivalTime: "2025-11-05T16:45",
-        passenger: "John Doe",
-        seat: "7C",
-        status: "Cancelled",
-        price: 5499,
-      },
-    ];
+  if (loading) return <p className="text-center mt-10">Loading bookings...</p>;
 
-    setTimeout(() => {
-      setBookings(dummyBookings);
-      setLoading(false);
-    }, 500);
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-gray-600">
-        Loading your bookings...
-      </div>
-    );
-  }
+  if (bookings.length === 0)
+    return <p className="text-center mt-10">No bookings yet.</p>;
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-6">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold text-blue-600 mb-6">My Bookings</h1>
-
-        {bookings.length === 0 ? (
-          <p className="text-gray-600">You have no bookings yet.</p>
-        ) : (
-          <div className="space-y-6">
-            {bookings.map((booking) => (
-              <div
-                key={booking.id}
-                className="bg-white shadow-lg rounded-xl p-6 flex flex-col md:flex-row justify-between items-center hover:shadow-xl transition"
-              >
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    {booking.airline} ({booking.flightNumber})
-                  </h2>
-                  <p className="text-gray-600">
-                    {booking.origin} → {booking.destination}
-                  </p>
-                  <p className="text-gray-600">
-                    {new Date(booking.departureTime).toLocaleString()} -{" "}
-                    {new Date(booking.arrivalTime).toLocaleString()}
-                  </p>
-                  <p className="text-gray-700">
-                    Passenger: <span className="font-medium">{booking.passenger}</span>
-                  </p>
-                  <p className="text-gray-700">
-                    Seat: <span className="font-medium">{booking.seat}</span>
-                  </p>
-                  <p
-                    className={`mt-2 font-semibold ${
-                      booking.status === "Confirmed"
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    Status: {booking.status}
-                  </p>
-                </div>
-
-                <div className="mt-4 md:mt-0 text-right">
-                  <p className="text-lg font-bold text-gray-800">
-                    ₹{booking.price.toLocaleString()}
-                  </p>
-                  {booking.status === "Confirmed" && (
-                    <button
-                      onClick={() =>
-                        alert(`Cancel booking ${booking.id} (API later)`)
-                      }
-                      className="mt-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-                    >
-                      Cancel
-                    </button>
-                  )}
+      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6">
+        <h1 className="text-2xl font-bold text-blue-600 mb-6">My Bookings</h1>
+        <table className="w-full border">
+          <thead>
+            <tr className="bg-gray-100 text-left">
+              <th className="p-2">Booking Ref</th>
+              <th className="p-2">Status</th>
+              <th className="p-2">Total</th>
+              <th className="p-2">Date</th>
+              <th className="p-2">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bookings.map((b) => (
+              <tr key={b.bookingId} className="border-t">
+                <td className="p-2">{b.bookingRef}</td>
+                <td className="p-2">{b.status}</td>
+                <td className="p-2">₹{b.totalAmount}</td>
+                <td className="p-2">
+                  {new Date(b.createdAt || b.CreatedAt).toLocaleString()}
+                </td>
+                <td className="p-2">
                   <Link
-                    to={`/user/bookings/${booking.id}`}
-                    className="block mt-2 text-blue-600 hover:underline"
+                    to={`/user/bookings/${b.bookingId}`}
+                    className="text-blue-600 hover:underline"
                   >
-                    View Details
+                    View
                   </Link>
-                </div>
-              </div>
+                </td>
+              </tr>
             ))}
-          </div>
-        )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

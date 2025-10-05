@@ -13,21 +13,23 @@ export function AuthProvider({ children }) {
     const role = localStorage.getItem("userRole");
     const fullName = localStorage.getItem("userName");
     const email = localStorage.getItem("userEmail");
+    const userId = localStorage.getItem("userId");
 
     if (token && role && fullName) {
-      setUser({ token, role, fullName, email });
+      setUser({ token, role, fullName, email, userId });
     }
     setLoading(false);
   }, []);
 
   // Save user on login
   const login = (data) => {
-    const { token, role, fullName, email } = data;
+    const { token, role, fullName, email, userId } = data;
     localStorage.setItem(import.meta.env.VITE_TOKEN_STORAGE_KEY, token);
     localStorage.setItem("userRole", role);
     localStorage.setItem("userName", fullName);
     localStorage.setItem("userEmail", email);
-    setUser({ token, role, fullName, email });
+    localStorage.setItem("userId", userId);
+    setUser({ token, role, fullName, email, userId });
   };
 
   // Clear user on logout
@@ -36,6 +38,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("userRole");
     localStorage.removeItem("userName");
     localStorage.removeItem("userEmail");
+    localStorage.removeItem("userId");
     setUser(null);
     toast.info("Logged out successfully.");
     window.location.href = "/login";
