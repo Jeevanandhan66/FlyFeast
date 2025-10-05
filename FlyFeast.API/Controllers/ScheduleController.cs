@@ -9,7 +9,7 @@ namespace FlyFeast.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin,Manager,Customer")]
     public class ScheduleController : ControllerBase
     {
         private readonly IScheduleRepository _scheduleRepository;

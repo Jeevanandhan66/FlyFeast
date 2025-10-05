@@ -9,7 +9,7 @@ namespace FlyFeast.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin,Manager,Customer")]
     public class SeatController : ControllerBase
     {
         private readonly ISeatRepository _seatRepository;
