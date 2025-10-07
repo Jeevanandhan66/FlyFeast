@@ -233,3 +233,59 @@ export async function deleteRefund(id) {
   return apiClient.delete(ENDPOINTS.REFUNDS.BY_ID(id));
 }
 
+
+///Dashboard
+
+// Dashboard stats
+export async function getAircraftCount() {
+  const { data } = await apiClient.get("/Aircraft");
+  return data.length;
+}
+
+export async function getScheduleCount() {
+  const { data } = await apiClient.get("/Schedule");
+  return data.length;
+}
+
+export async function getBookingCount() {
+  const { data } = await apiClient.get("/Booking");
+  return data.length;
+}
+
+export async function getRevenueTotal() {
+  const { data } = await apiClient.get("/Payment");
+  return data.reduce((sum, p) => sum + p.amount, 0);
+}
+
+// Recent bookings
+export async function getRecentBookings(limit = 5) {
+  const { data } = await apiClient.get("/Booking");
+  return data
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, limit);
+}
+
+// Bookings per month (aggregation can be done client-side)
+export async function getBookingsPerMonth() {
+  const { data } = await apiClient.get("/Booking");
+  const grouped = {};
+  data.forEach((b) => {
+    const m = new Date(b.createdAt).toLocaleString("default", { month: "short" });
+    grouped[m] = (grouped[m] || 0) + 1;
+  });
+  return Object.entries(grouped).map(([month, bookings]) => ({ month, bookings }));
+}
+
+// Top routes distribution
+export async function getTopRoutes() {
+  const { data } = await apiClient.get("/Booking");
+  const grouped = {};
+  data.forEach((b) => {
+    const route = `${b.schedule?.route?.originAirport?.code}-${
+      b.schedule?.route?.destinationAirport?.code
+    }`;
+    grouped[route] = (grouped[route] || 0) + 1;
+  });
+  return Object.entries(grouped).map(([name, value]) => ({ name, value }));
+}
+

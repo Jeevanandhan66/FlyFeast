@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   BarChart3,
   Plane,
@@ -10,6 +10,7 @@ import {
   CreditCard,
   RotateCcw,
   Settings,
+  Home,
 } from "lucide-react";
 import Toaster from "../components/feedback/Toaster";
 
@@ -27,13 +28,13 @@ const navItems = [
 ];
 
 export default function AdminLayout() {
+  const navigate = useNavigate();
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-lg flex flex-col">
-        <div className="p-6 text-2xl font-bold text-indigo-600">
-          FlyFeast Admin
-        </div>
+      <aside className="w-64 bg-indigo-600 text-white shadow-lg flex flex-col">
+        <div className="p-6 text-2xl font-bold">FlyFeast Admin</div>
         <nav className="flex-1 px-4">
           <ul className="space-y-2">
             {navItems.map((item) => (
@@ -43,8 +44,8 @@ export default function AdminLayout() {
                   className={({ isActive }) =>
                     `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
                       isActive
-                        ? "bg-indigo-100 text-indigo-700"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        ? "bg-white text-indigo-700"
+                        : "text-indigo-100 hover:bg-indigo-500 hover:text-white"
                     }`
                   }
                 >
@@ -55,20 +56,30 @@ export default function AdminLayout() {
             ))}
           </ul>
         </nav>
-        <div className="p-4 text-xs text-gray-400">© {new Date().getFullYear()} FlyFeast</div>
+        <div className="p-4 text-xs text-indigo-200 border-t border-indigo-500">
+          © {new Date().getFullYear()} FlyFeast
+        </div>
       </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Topbar */}
         <header className="h-16 bg-white shadow flex items-center justify-between px-6">
-          <h1 className="text-lg font-semibold">Admin Console</h1>
-          <div className="flex items-center gap-3">
+          <h1 className="text-lg font-semibold text-indigo-700">Admin Console</h1>
+          <div className="flex items-center gap-4">
+            {/* Home Button */}
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
+            >
+              <Home size={16} />
+              Home
+            </button>
             <span className="text-sm text-gray-600">Admin User</span>
             <img
               src="https://ui-avatars.com/api/?name=Admin&background=6366F1&color=fff"
               alt="avatar"
-              className="h-8 w-8 rounded-full"
+              className="h-8 w-8 rounded-full border border-indigo-300"
             />
           </div>
         </header>
@@ -78,6 +89,7 @@ export default function AdminLayout() {
           <Outlet />
         </main>
       </div>
+
       {/* Toast notifications */}
       <Toaster />
     </div>

@@ -1,4 +1,3 @@
-// src/pages/admin/Aircraft.jsx
 import { useEffect, useMemo, useState } from "react";
 import {
   getAircrafts,
@@ -6,6 +5,7 @@ import {
   updateAircraft,
   deleteAircraft,
 } from "../../services/adminService";
+import { useToast } from "../../hooks/useToast";
 
 function initialForm() {
   return {
@@ -19,6 +19,7 @@ function initialForm() {
 }
 
 export default function Aircraft() {
+  const toast = useToast();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
@@ -28,6 +29,7 @@ export default function Aircraft() {
   const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [filter, setFilter] = useState("");
+  const [vErrors, setVErrors] = useState({});
 
   // Derived filtered list
   const filtered = useMemo(() => {
@@ -54,7 +56,9 @@ export default function Aircraft() {
       const data = await getAircrafts();
       setList(Array.isArray(data) ? data : []);
     } catch (e) {
-      setErr(e?.response?.data?.message || e?.message || "Failed to load aircraft.");
+      const msg = e?.response?.data?.message || e?.message || "Failed to load aircraft.";
+      setErr(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -103,17 +107,14 @@ export default function Aircraft() {
 
   function validate() {
     const errors = {};
-    // Required
     if (!form.aircraftCode?.trim()) errors.aircraftCode = "Aircraft code is required.";
     if (!form.ownerId?.trim()) errors.ownerId = "Owner ID is required.";
-    // Ranges
     if (!(Number(form.economySeats) >= 1))
       errors.economySeats = "Economy seats must be at least 1.";
     if (!(Number(form.businessSeats) >= 0))
       errors.businessSeats = "Business seats must be 0 or more.";
     if (!(Number(form.firstClassSeats) >= 0))
       errors.firstClassSeats = "First-class seats must be 0 or more.";
-    // String lengths
     if (form.aircraftCode && form.aircraftCode.length > 20)
       errors.aircraftCode = "Max 20 characters.";
     if (form.aircraftName && form.aircraftName.length > 100)
@@ -121,7 +122,6 @@ export default function Aircraft() {
     return errors;
   }
 
-  const [vErrors, setVErrors] = useState({});
   async function onSubmit(e) {
     e.preventDefault();
     const errors = validate();
@@ -143,13 +143,17 @@ export default function Aircraft() {
     try {
       if (mode === "create") {
         await createAircraft(payload);
+        toast.success("Aircraft created successfully!");
       } else {
         await updateAircraft(editingId, payload);
+        toast.success("Aircraft updated successfully!");
       }
       await load();
       setModalOpen(false);
     } catch (e) {
-      setErr(e?.response?.data?.message || e?.message || "Failed to save aircraft.");
+      const msg = e?.response?.data?.message || e?.message || "Failed to save aircraft.";
+      setErr(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -161,8 +165,11 @@ export default function Aircraft() {
     try {
       await deleteAircraft(id);
       await load();
+      toast.success("Aircraft deleted.");
     } catch (e) {
-      setErr(e?.response?.data?.message || e?.message || "Failed to delete aircraft.");
+      const msg = e?.response?.data?.message || e?.message || "Failed to delete aircraft.";
+      setErr(msg);
+      toast.error(msg);
     }
   }
 

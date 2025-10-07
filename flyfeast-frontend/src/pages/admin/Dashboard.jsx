@@ -1,3 +1,13 @@
+import { useEffect, useState } from "react";
+import {
+  getAircraftCount,
+  getScheduleCount,
+  getBookingCount,
+  getRevenueTotal,
+  getRecentBookings,
+  getBookingsPerMonth,
+  getTopRoutes,
+} from "../../services/adminService";
 import {
   BarChart,
   Bar,
@@ -10,53 +20,52 @@ import {
   Cell,
   ResponsiveContainer,
 } from "recharts";
-
-const stats = [
-  { label: "Aircraft", value: 42 },       // from AircraftController
-  { label: "Schedules", value: 180 },     // from ScheduleController
-  { label: "Bookings", value: 245 },      // from BookingController
-  { label: "Revenue", value: "$78,500" }, // from PaymentController
-];
-
-const bookingsData = [
-  { month: "Jan", bookings: 120 },
-  { month: "Feb", bookings: 98 },
-  { month: "Mar", bookings: 180 },
-  { month: "Apr", bookings: 150 },
-  { month: "May", bookings: 200 },
-];
-
-const routeDistribution = [
-  { name: "NYC-LAX", value: 400 },
-  { name: "LHR-DXB", value: 300 },
-  { name: "DEL-SIN", value: 200 },
-  { name: "SYD-HKG", value: 100 },
-];
+import { formatCurrency } from "../../utils/formatters";
 
 const COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444"];
 
-const recentBookings = [
-  {
-    id: "BK001",
-    passenger: "John Doe",
-    route: "NYC-LAX",
-    status: "Confirmed",
-  },
-  {
-    id: "BK002",
-    passenger: "Jane Smith",
-    route: "LHR-DXB",
-    status: "Pending",
-  },
-  {
-    id: "BK003",
-    passenger: "Raj Patel",
-    route: "DEL-SIN",
-    status: "Cancelled",
-  },
-];
-
 export default function Dashboard() {
+  const [stats, setStats] = useState([]);
+  const [bookingsData, setBookingsData] = useState([]);
+  const [routeDistribution, setRouteDistribution] = useState([]);
+  const [recentBookings, setRecentBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [aircraft, schedules, bookings, revenue, recent, perMonth, routes] =
+          await Promise.all([
+            getAircraftCount(),
+            getScheduleCount(),
+            getBookingCount(),
+            getRevenueTotal(),
+            getRecentBookings(),
+            getBookingsPerMonth(),
+            getTopRoutes(),
+          ]);
+
+        setStats([
+          { label: "Aircraft", value: aircraft },
+          { label: "Schedules", value: schedules },
+          { label: "Bookings", value: bookings },
+          { label: "Revenue", value: formatCurrency(revenue) },
+        ]);
+        setBookingsData(perMonth);
+        setRouteDistribution(routes);
+        setRecentBookings(recent);
+      } catch (err) {
+        console.error("Failed to load dashboard data", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  if (loading) return <p>Loading dashboard...</p>;
+
   return (
     <div className="space-y-8">
       {/* Stats */}
@@ -125,10 +134,14 @@ export default function Dashboard() {
             </thead>
             <tbody>
               {recentBookings.map((b) => (
-                <tr key={b.id} className="border-b">
-                  <td className="px-4 py-2">{b.id}</td>
-                  <td className="px-4 py-2">{b.passenger}</td>
-                  <td className="px-4 py-2">{b.route}</td>
+                <tr key={b.bookingId} className="border-b">
+                  <td className="px-4 py-2">{b.bookingRef}</td>
+                  <td className="px-4 py-2">{b.user?.fullName}</td>
+                  <td className="px-4 py-2">
+                    {b.schedule?.route
+                      ? `${b.schedule.route.originAirport?.code} → ${b.schedule.route.destinationAirport?.code}`
+                      : "-"}
+                  </td>
                   <td className="px-4 py-2">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
