@@ -9,7 +9,6 @@ namespace FlyFeast.API.Models
         public int RefundId { get; set; }
 
         public int BookingId { get; set; }
-
         [ForeignKey(nameof(BookingId))]
         public Booking? Booking { get; set; }
 
@@ -20,12 +19,11 @@ namespace FlyFeast.API.Models
         [RegularExpression("Initiated|Processed|Failed")]
         public string Status { get; set; } = "Initiated";
 
-        [Required]
-        public string ProcessedById { get; set; } = string.Empty;
-
+        public string? ProcessedById { get; set; } // now optional
         [ForeignKey(nameof(ProcessedById))]
         public ApplicationUser? ProcessedUser { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
+
 }

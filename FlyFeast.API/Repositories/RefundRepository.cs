@@ -54,13 +54,7 @@ namespace FlyFeast.API.Repositories
             _context.Refunds.Add(refund);
             await _context.SaveChangesAsync();
 
-            return await _context.Refunds
-                .Include(r => r.Booking)
-                    .ThenInclude(b => b.User)
-                .Include(r => r.Booking)
-                    .ThenInclude(b => b.Schedule)
-                .Include(r => r.ProcessedUser)
-                .FirstOrDefaultAsync(r => r.RefundId == refund.RefundId)
+            return await GetByIdAsync(refund.RefundId)
                 ?? throw new Exception("Refund not found after insert");
         }
 

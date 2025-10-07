@@ -4,8 +4,9 @@
     {
         public int BookingId { get; set; }
         public decimal Amount { get; set; }
-        public string ProcessedById { get; set; } = string.Empty;
+        public string? ProcessedById { get; set; }
         public string Status { get; set; } = "Initiated";
     }
+
 
 }

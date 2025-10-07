@@ -129,9 +129,13 @@ public class MappingProfile : Profile
         CreateMap<Payment, PaymentResponseDTO>().ReverseMap();
 
         // -------------------- REFUNDS --------------------
+        CreateMap<Refund, RefundResponseDTO>()
+            .ForMember(dest => dest.Booking, opt => opt.MapFrom(src => src.Booking ?? new Booking()))
+            .ForMember(dest => dest.ProcessedUser, opt => opt.MapFrom(src => src.ProcessedUser ?? new ApplicationUser()));
+
         CreateMap<RefundRequestDTO, Refund>()
             .ForMember(dest => dest.ProcessedById, opt => opt.MapFrom(src => src.ProcessedById));
 
-        CreateMap<Refund, RefundResponseDTO>().ReverseMap();
+
     }
 }
