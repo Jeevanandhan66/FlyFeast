@@ -35,24 +35,17 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await api.post("/Auth/login", formData);
-
-      login(res.data); // Save user in context
+      login(res.data); 
       toast.success(`Welcome back, ${res.data.fullName || "User"}!`);
-      navigate("/");
+      navigate("/"); // close modal after login
     } catch (error) {
-
       let message = "Invalid email or password.";
-
-      if (error.response) {
-        if (error.response.status === 401 || error.response.status === 400) {
-          if (typeof error.response.data === "string") {
-            message = error.response.data;
-          } else if (error.response.data?.message) {
-            message = error.response.data.message;
-          }
-        }
+      if (error.response?.data) {
+        message =
+          typeof error.response.data === "string"
+            ? error.response.data
+            : error.response.data.message || message;
       }
-
       toast.error(message);
     } finally {
       setLoading(false);
@@ -60,19 +53,29 @@ export default function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-md p-8">
-        <h2 className="text-3xl font-bold text-center text-white mb-8">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md relative">
+        {/* Close button */}
+        <button
+          onClick={() => navigate("/")}
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+        >
+          ✖
+        </button>
+
+        <h2 className="text-2xl font-bold text-center text-blue-600 mb-6">
           Login to FlyFeast
         </h2>
+
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-white">Email</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
             <input
               type="email"
               name="email"
-              className="mt-1 w-full border border-white/50 rounded-lg p-3 bg-white/10 text-white placeholder-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="Enter your email"
               value={formData.email}
               onChange={handleChange}
@@ -82,13 +85,14 @@ export default function Login() {
             )}
           </div>
 
-          {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-white">Password</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
             <input
               type="password"
               name="password"
-              className="mt-1 w-full border border-white/50 rounded-lg p-3 bg-white/10 text-white placeholder-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="Enter your password"
               value={formData.password}
               onChange={handleChange}
@@ -98,19 +102,18 @@ export default function Login() {
             )}
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition shadow-lg disabled:opacity-50"
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        <p className="text-sm text-center mt-6 text-white/80">
+        <p className="text-sm text-center mt-6 text-gray-600">
           Don’t have an account?{" "}
-          <Link to="/register" className="text-blue-300 hover:underline">
+          <Link to="/register" className="text-blue-600 hover:underline">
             Register
           </Link>
         </p>

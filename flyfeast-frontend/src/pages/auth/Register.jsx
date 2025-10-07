@@ -70,11 +70,20 @@ export default function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-2xl p-8">
-        <h2 className="text-3xl font-bold text-center text-white mb-8">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8">
+        {/* Close button */}
+        <button
+          onClick={() => navigate("/")}
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl"
+        >
+          ✖
+        </button>
+
+        <h2 className="text-3xl font-bold text-center text-blue-600 mb-8">
           Create Your FlyFeast Account
         </h2>
+
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -85,7 +94,7 @@ export default function Register() {
               type="text"
               name="fullName"
               placeholder="Full Name"
-              className="w-full border border-white/50 rounded-lg p-3 bg-white/10 text-white placeholder-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.fullName}
               onChange={handleChange}
             />
@@ -100,7 +109,7 @@ export default function Register() {
               type="email"
               name="email"
               placeholder="Email"
-              className="w-full border border-white/50 rounded-lg p-3 bg-white/10 text-white placeholder-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.email}
               onChange={handleChange}
             />
@@ -115,7 +124,7 @@ export default function Register() {
               type="password"
               name="password"
               placeholder="Password"
-              className="w-full border border-white/50 rounded-lg p-3 bg-white/10 text-white placeholder-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.password}
               onChange={handleChange}
             />
@@ -130,7 +139,7 @@ export default function Register() {
               type="password"
               name="confirmPassword"
               placeholder="Confirm Password"
-              className="w-full border border-white/50 rounded-lg p-3 bg-white/10 text-white placeholder-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.confirmPassword}
               onChange={handleChange}
             />
@@ -143,17 +152,16 @@ export default function Register() {
           <div>
             <select
               name="gender"
-              className="w-full border border-white/50 rounded-lg p-3 bg-white/10 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.gender}
               onChange={handleChange}
             >
-              <option value="" disabled hidden className="text-gray-400">
+              <option value="" disabled hidden>
                 Select Gender
               </option>
-
-              <option className="text-black">Male</option>
-              <option className="text-black">Female</option>
-              <option className="text-black">Other</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
             </select>
             {errors.gender && (
               <p className="text-sm text-red-500">{errors.gender}</p>
@@ -166,7 +174,7 @@ export default function Register() {
               type="text"
               name="phoneNumber"
               placeholder="Phone Number"
-              className="w-full border border-white/50 rounded-lg p-3 bg-white/10 text-white placeholder-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.phoneNumber}
               onChange={handleChange}
             />
@@ -178,7 +186,7 @@ export default function Register() {
               type="text"
               name="passportNumber"
               placeholder="Passport Number"
-              className="w-full border border-white/50 rounded-lg p-3 bg-white/10 text-white placeholder-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.passportNumber}
               onChange={handleChange}
             />
@@ -190,7 +198,7 @@ export default function Register() {
               type="text"
               name="nationality"
               placeholder="Nationality"
-              className="w-full border border-white/50 rounded-lg p-3 bg-white/10 text-white placeholder-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.nationality}
               onChange={handleChange}
             />
@@ -202,7 +210,7 @@ export default function Register() {
               type="text"
               name="address"
               placeholder="Address"
-              className="w-full border border-white/50 rounded-lg p-3 bg-white/10 text-white placeholder-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.address}
               onChange={handleChange}
             />
@@ -210,13 +218,13 @@ export default function Register() {
 
           {/* Date of Birth */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-white mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               DOB
             </label>
             <input
               type="date"
               name="dateOfBirth"
-              className="w-full border border-white/50 rounded-lg p-3 bg-white/10 text-white placeholder-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.dateOfBirth}
               onChange={handleChange}
             />
@@ -237,9 +245,9 @@ export default function Register() {
           </div>
         </form>
 
-        <p className="text-sm text-center mt-6 text-white/80">
+        <p className="text-sm text-center mt-6 text-gray-600">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-300 hover:underline">
+          <Link to="/login" className="text-blue-600 hover:underline">
             Login
           </Link>
         </p>

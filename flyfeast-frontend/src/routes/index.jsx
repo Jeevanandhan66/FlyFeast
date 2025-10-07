@@ -19,11 +19,19 @@ import Confirmation from "../pages/booking/Confirmation";
 import Bookings from "../pages/user/Bookings";
 import BookingDetail from "../pages/user/BookingDetail";
 import Profile from "../pages/user/Profile";
+//Admin
+import Aircraft from "../pages/admin/Aircraft";
+import Airports from "../pages/admin/Airports";
+import Routes from "../pages/admin/Routes";
+import Schedules from "../pages/admin/Schedules";
+import AdminBookings from "../pages/admin/Bookings";
+import Users from "../pages/admin/Users";
+import Payments from "../pages/admin/Payments";
 
 import NotFound from "../pages/errors/NotFound";
 import Unauthorized from "../pages/errors/Unauthorized";
-// import Dashboard from "../pages/admin/Dashboard";
-// import ProtectedRoute from "./ProtectedRoute";
+import Dashboard from "../pages/admin/Dashboard";
+import ProtectedRoute from "./ProtectedRoute";
 
 const router = createBrowserRouter([
   // Public/User routes
@@ -33,6 +41,8 @@ const router = createBrowserRouter([
     errorElement: <NotFound />,
     children: [
       { index: true, element: <Home /> },
+      { path: "login", element: <Login /> },
+      { path: "register", element: <Register /> },
       { path: "results", element: <Results /> },
       { path: "booking/:id", element: <Booking /> },
       { path: "booking/review", element: <Review /> },
@@ -40,49 +50,44 @@ const router = createBrowserRouter([
       { path: "booking/confirmation", element: <Confirmation /> },
       { path: "user/bookings", element: <Bookings /> },
       { path: "user/bookings/:id", element: <BookingDetail /> },
-      
     ],
   },
 
-  // Auth routes
+  // User routes (protected by UserLayout)
   {
-    path: "/",
-    element: <AuthLayout />,
+    path: "/user",
+    element: <UserLayout />,
     children: [
-      { path: "login", element: <Login /> },
-      { path: "register", element: <Register /> },
+      { path: "profile", element: <Profile /> },
+      { path: "bookings", element: <Bookings /> },
+      { path: "bookings/:id", element: <BookingDetail /> },
     ],
   },
-
-  //User Routes
-
-  {
-  path: "/user",
-  element: <UserLayout />,
-  children: [
-    { path: "profile", element: <Profile /> },
-    { path: "bookings", element: <Bookings /> },
-    { path: "bookings/:id", element: <BookingDetail /> },
-  ],
-},
-
 
   // Admin protected routes
-  // {
-  //   path: "/admin",
-  //   element: <ProtectedRoute role="Admin" />,
-  //   children: [
-  //     {
-  //       element: <AdminLayout />,
-  //       children: [
-  //         { index: true, element: <Dashboard /> },
-  //         // later add: /admin/flights, /admin/schedules, etc.
-  //       ],
-  //     },
-  //   ],
-  // },
+  {
+    path: "/admin",
+    element: <ProtectedRoute role="Admin" />, // wrapper that checks admin role
+    children: [
+      {
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <Dashboard /> },
+          { path: "aircraft", element: <Aircraft /> },
+          { path: "airports", element: <Airports /> },
+          { path: "routes", element: <Routes /> },
+          { path: "schedules", element: <Schedules /> },
+          { path: "bookings", element: <AdminBookings /> },
+          { path: "users", element: <Users /> },
+          { path: "payments", element: <Payments /> }
 
-  // Unauthorized
+
+        ],
+      },
+    ],
+  },
+
+  // Unauthorized page
   {
     path: "/unauthorized",
     element: <Unauthorized />,

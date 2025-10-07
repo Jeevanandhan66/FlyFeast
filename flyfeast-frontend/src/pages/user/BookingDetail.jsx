@@ -10,11 +10,11 @@ export default function BookingDetail() {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ React v3 uses `contentRef` instead of `content`
+
   const contentRef = useRef();
 
   const handlePrint = useReactToPrint({
-    contentRef, // new API
+    contentRef, 
     documentTitle: booking ? `Ticket-${booking.bookingRef}` : "Ticket",
   });
 
