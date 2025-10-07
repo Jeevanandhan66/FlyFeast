@@ -28,7 +28,8 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+      <section className="relative bg-gradient-to-r from-blue-600 to-indigo-700 text-white min-h-[calc(100vh-4rem)] flex flex-col justify-between">
+
         <div className="absolute inset-0">
           <img
             src={heroImage}
@@ -37,6 +38,7 @@ export default function Home() {
           />
         </div>
         <div className="relative z-10 flex flex-col items-center justify-center text-center py-20 px-4">
+
           <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
             Fly high. Book fast. Feast easy
           </h1>
@@ -47,7 +49,7 @@ export default function Home() {
         </div>
 
         {/* Search Form */}
-        <div className="relative z-20 max-w-4xl mx-auto px-4 pb-16">
+        <div className="relative z-20 max-w-4xl mx-auto px-4 pb-32">
           <form
             onSubmit={handleSubmit}
             className="bg-white shadow-2xl rounded-3xl p-6 md:p-8 grid grid-cols-1 md:grid-cols-4 gap-4 border-t-8 border-blue-600 relative overflow-hidden text-black"
