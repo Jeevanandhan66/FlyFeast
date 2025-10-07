@@ -27,6 +27,7 @@ import Schedules from "../pages/admin/Schedules";
 import AdminBookings from "../pages/admin/Bookings";
 import Users from "../pages/admin/Users";
 import Payments from "../pages/admin/Payments";
+import Refunds from "../pages/admin/Refunds";
 
 import NotFound from "../pages/errors/NotFound";
 import Unauthorized from "../pages/errors/Unauthorized";
@@ -79,7 +80,8 @@ const router = createBrowserRouter([
           { path: "schedules", element: <Schedules /> },
           { path: "bookings", element: <AdminBookings /> },
           { path: "users", element: <Users /> },
-          { path: "payments", element: <Payments /> }
+          { path: "payments", element: <Payments /> },
+          { path: "refunds", element: <Refunds /> },
 
 
         ],

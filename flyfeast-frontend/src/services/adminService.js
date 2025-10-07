@@ -207,3 +207,29 @@ export async function deletePayment(id) {
   const res = await apiClient.delete(ENDPOINTS.PAYMENTS.BY_ID(id));
   return res.data;
 }
+
+// ---------------- REFUNDS ---------------- 
+export async function getRefunds() {
+  const { data } = await apiClient.get(ENDPOINTS.REFUNDS.BASE);
+  return data;
+}
+
+export async function getRefundById(id) {
+  const { data } = await apiClient.get(ENDPOINTS.REFUNDS.BY_ID(id));
+  return data;
+}
+
+export async function createRefund(payload) {
+  const { data } = await apiClient.post(ENDPOINTS.REFUNDS.BASE, payload);
+  return data;
+}
+
+export async function updateRefund(id, payload) {
+  const { data } = await apiClient.put(ENDPOINTS.REFUNDS.BY_ID(id), payload);
+  return data;
+}
+
+export async function deleteRefund(id) {
+  return apiClient.delete(ENDPOINTS.REFUNDS.BY_ID(id));
+}
+

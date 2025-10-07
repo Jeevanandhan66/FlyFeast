@@ -1,5 +1,5 @@
 export const ENDPOINTS = {
-  
+
   AIRCRAFT: {
     BASE: "/Aircraft",
     BY_ID: (id) => `/Aircraft/${id}`,
@@ -30,5 +30,11 @@ export const ENDPOINTS = {
     BASE: "/Payment",
     BY_ID: (id) => `/Payment/${id}`,
     BY_BOOKING: (bookingId) => `/Payment/bybooking/${bookingId}`,
+  },
+
+  REFUNDS: {
+    BASE: "/Refund",
+    BY_ID: (id) => `/Refund/${id}`,
+    BY_BOOKING: (bookingId) => `/Refund/bybooking/${bookingId}`,
   },
 };
