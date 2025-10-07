@@ -103,6 +103,7 @@ namespace FlyFeast.API.Controllers
             }
         }
 
+
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeletePayment(int id)

@@ -80,6 +80,8 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IRefundRepository, RefundRepository>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddScoped<ISeatRepository, SeatRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 //Services
 builder.Services.AddScoped<IFlightSearchService, FlightSearchService>();

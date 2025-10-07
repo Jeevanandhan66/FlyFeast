@@ -120,10 +120,15 @@ namespace FlyFeast.API.Controllers
 
                 return NoContent();
             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = $"Could not delete schedule: {ex.Message}" });
+                return StatusCode(500, new { error = $"Internal server error: {ex.Message}" });
             }
         }
+
     }
 }

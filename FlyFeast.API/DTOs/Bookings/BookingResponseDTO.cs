@@ -11,6 +11,6 @@ public class BookingResponseDTO
     public DateTime CreatedAt { get; set; }
 
     public UserSummaryDTO User { get; set; } = new();
-    public ScheduleSummaryDTO Schedule { get; set; } = new();
+    public ScheduleResponseDTO Schedule { get; set; } = new();
     public List<BookingItemDTO> BookingItems { get; set; } = new();
 }

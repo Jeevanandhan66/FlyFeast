@@ -72,12 +72,20 @@ namespace FlyFeast.API.Repositories
             existing.BookingId = payment.BookingId;
             existing.Amount = payment.Amount;
             existing.Provider = payment.Provider;
-            existing.ProviderRef = payment.ProviderRef;
             existing.Status = payment.Status;
 
+            if (!string.IsNullOrEmpty(payment.ProviderRef))
+                existing.ProviderRef = payment.ProviderRef;
+
             await _context.SaveChangesAsync();
-            return existing;
+            return await _context.Payments
+                .Include(p => p.Booking).ThenInclude(b => b.User)
+                .Include(p => p.Booking).ThenInclude(b => b.Schedule)
+                .FirstOrDefaultAsync(p => p.PaymentId == id);
         }
+
+
+
 
         public async Task<bool> DeleteAsync(int id)
         {

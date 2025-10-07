@@ -34,5 +34,3 @@ namespace FlyFeast.API.Models
         public ICollection<FlightRoute>? Routes { get; set; }
     }
 }
-
-//test comment

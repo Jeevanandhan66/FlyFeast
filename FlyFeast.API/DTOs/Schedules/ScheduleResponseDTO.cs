@@ -17,11 +17,9 @@ namespace FlyFeast.API.DTOs.Schedules
         [Required]
         public DateTime ArrivalTime { get; set; }
 
-        // Duration in minutes (for calculations)
         [Required]
         public int DurationMinutes { get; set; }
 
-        // Duration in human-readable format (e.g., "2h 45m")
         [Required]
         public string DurationFormatted { get; set; } = string.Empty;
 

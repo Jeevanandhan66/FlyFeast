@@ -68,129 +68,49 @@ namespace FlyFeast.API.Data.Repositories
             return role;
         }
 
-        public async Task<List<Aircraft>> GetAircraftsAsync()
+        // ---------------- NEW METHODS ----------------
+
+        public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
         {
-            return await _context.Aircrafts.Include(a => a.Owner).ToListAsync();
+            return await _userManager.Users
+                .Include(u => u.Passenger)
+                .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
-        public async Task<Aircraft> AddAircraftAsync(Aircraft aircraft)
+        public async Task<ApplicationUser?> UpdateUserAsync(ApplicationUser updatedUser)
         {
-            _context.Aircrafts.Add(aircraft);
-            await _context.SaveChangesAsync();
-            return aircraft;
+            var user = await _userManager.FindByIdAsync(updatedUser.Id);
+            if (user == null) return null;
+
+            user.FullName = updatedUser.FullName;
+            user.Email = updatedUser.Email;
+            user.UserName = updatedUser.UserName;
+            user.PhoneNumber = updatedUser.PhoneNumber;
+            user.Gender = updatedUser.Gender;
+            user.Address = updatedUser.Address;
+            user.IsActive = updatedUser.IsActive;
+
+            var result = await _userManager.UpdateAsync(user);
+            return result.Succeeded ? user : null;
         }
 
-
-        public async Task<List<Airport>> GetAirportsAsync()
+        public async Task<bool> DeleteUserAsync(string userId)
         {
-            return await _context.Airports.ToListAsync();
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return false;
+
+            var result = await _userManager.DeleteAsync(user);
+            return result.Succeeded;
         }
 
-        public async Task<Airport> AddAirportAsync(Airport airport)
+        public async Task<bool> ToggleUserActiveAsync(string userId, bool isActive)
         {
-            _context.Airports.Add(airport);
-            await _context.SaveChangesAsync();
-            return airport;
-        }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return false;
 
-
-        public async Task<List<FlightRoute>> GetRoutesAsync()
-        {
-            return await _context.Routes
-                .Include(r => r.Aircraft).ThenInclude(a => a.Owner)
-                .Include(r => r.OriginAirport)
-                .Include(r => r.DestinationAirport)
-                .ToListAsync();
-        }
-
-        public async Task<FlightRoute> AddRouteAsync(FlightRoute route)
-        {
-            _context.Routes.Add(route);
-            await _context.SaveChangesAsync();
-            return route;
-        }
-
-
-        public async Task<List<Schedule>> GetSchedulesAsync()
-        {
-            return await _context.Schedules
-                .Include(s => s.Route)
-                    .ThenInclude(r => r.Aircraft)
-                        .ThenInclude(a => a.Owner)
-                .Include(s => s.Route.OriginAirport)
-                .Include(s => s.Route.DestinationAirport)
-                .Include(s => s.Seats)
-                .ToListAsync();
-        }
-
-        public async Task<Schedule> AddScheduleAsync(Schedule schedule)
-        {
-            _context.Schedules.Add(schedule);
-            await _context.SaveChangesAsync();
-            return schedule;
-        }
-
-
-        public async Task<List<Seat>> GetSeatsAsync()
-        {
-            return await _context.Seats.Include(s => s.Schedule).ToListAsync();
-        }
-
-        public async Task<Seat> AddSeatAsync(Seat seat)
-        {
-            _context.Seats.Add(seat);
-            await _context.SaveChangesAsync();
-            return seat;
-        }
-
-
-        public async Task<List<Booking>> GetBookingsAsync()
-        {
-            return await _context.Bookings
-                .Include(b => b.User)
-                .Include(b => b.Schedule)
-                .Include(b => b.BookingItems).ThenInclude(bi => bi.Seat)
-                .Include(b => b.BookingItems).ThenInclude(bi => bi.Passenger)
-                .Include(b => b.Payments)
-                .Include(b => b.Refunds)
-                .ToListAsync();
-        }
-
-
-        public async Task<List<Payment>> GetPaymentsAsync()
-        {
-            return await _context.Payments
-                .Include(p => p.Booking)
-                    .ThenInclude(b => b.User)
-                .Include(p => p.Booking)
-                    .ThenInclude(b => b.Schedule)
-                .ToListAsync();
-        }
-
-        public async Task<Payment> AddPaymentAsync(Payment payment)
-        {
-            _context.Payments.Add(payment);
-            await _context.SaveChangesAsync();
-            return payment;
-        }
-
-
-        public async Task<List<Refund>> GetRefundsAsync()
-        {
-            return await _context.Refunds
-                .Include(r => r.Booking)
-                    .ThenInclude(b => b.User)
-                .Include(r => r.Booking)
-                    .ThenInclude(b => b.Schedule)
-                .Include(r => r.ProcessedUser)
-                .ToListAsync();
-        }
-
-        public async Task<Refund> AddRefundAsync(Refund refund)
-        {
-            _context.Refunds.Add(refund);
-            await _context.SaveChangesAsync();
-            return refund;
+            user.IsActive = isActive;
+            var result = await _userManager.UpdateAsync(user);
+            return result.Succeeded;
         }
     }
 }

@@ -119,13 +119,21 @@ namespace FlyFeast.API.Repositories
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var existing = await _context.Schedules.FindAsync(id);
-            if (existing == null) return false;
+            var schedule = await _context.Schedules
+                .Include(s => s.Bookings)
+                .FirstOrDefaultAsync(s => s.ScheduleId == id);
 
-            _context.Schedules.Remove(existing);
+            if (schedule == null)
+                return false;
+
+            if (schedule.Bookings != null && schedule.Bookings.Any())
+                throw new InvalidOperationException("Cannot delete schedule with active bookings.");
+
+            _context.Schedules.Remove(schedule);
             await _context.SaveChangesAsync();
             return true;
         }
+
 
         private Seat CreateSeat(int scheduleId, string seatNumber, SeatClass seatClass, decimal price)
         {

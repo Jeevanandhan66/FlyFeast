@@ -171,5 +171,48 @@ namespace FlyFeast.API.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+
+        [HttpGet("users/{userId}")]
+        public async Task<IActionResult> GetUserById(string userId)
+        {
+            var user = await _adminRepository.GetUserByIdAsync(userId);
+            if (user == null) return NotFound("User not found.");
+            return Ok(_mapper.Map<UserResponseDTO>(user));
+        }
+
+        [HttpPut("users/{userId}")]
+        public async Task<IActionResult> UpdateUser(string userId, [FromBody] UserRequestDTO dto)
+        {
+            var existing = await _adminRepository.GetUserByIdAsync(userId);
+            if (existing == null) return NotFound("User not found.");
+
+            existing.FullName = dto.FullName;
+            existing.UserName = dto.UserName;
+            existing.Email = dto.Email;
+            existing.PhoneNumber = dto.Phone;
+            existing.Gender = dto.Gender;
+            existing.Address = dto.Address;
+
+            var updated = await _adminRepository.UpdateUserAsync(existing);
+            if (updated == null) return StatusCode(500, "Could not update user.");
+            return Ok(_mapper.Map<UserResponseDTO>(updated));
+        }
+
+        [HttpDelete("users/{userId}")]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            var success = await _adminRepository.DeleteUserAsync(userId);
+            if (!success) return NotFound("User not found.");
+            return NoContent();
+        }
+
+        [HttpPut("users/{userId}/activate")]
+        public async Task<IActionResult> ToggleUserActive(string userId, [FromQuery] bool isActive)
+        {
+            var success = await _adminRepository.ToggleUserActiveAsync(userId, isActive);
+            if (!success) return NotFound("User not found.");
+            return Ok(new { userId, isActive });
+        }
+
     }
 }

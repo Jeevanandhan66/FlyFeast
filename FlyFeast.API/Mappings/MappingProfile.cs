@@ -66,7 +66,9 @@ public class MappingProfile : Profile
         CreateMap<Schedule, ScheduleResponseDTO>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
             .ForMember(dest => dest.DurationMinutes, opt => opt.MapFrom(src => (int)(src.ArrivalTime - src.DepartureTime).TotalMinutes))
-            .ForMember(dest => dest.DurationFormatted, opt => opt.MapFrom(src => $"{(src.ArrivalTime - src.DepartureTime).Hours}h {(src.ArrivalTime - src.DepartureTime).Minutes}m"));
+            .ForMember(dest => dest.DurationFormatted, opt => opt.MapFrom(src => $"{(src.ArrivalTime - src.DepartureTime).Hours}h {(src.ArrivalTime - src.DepartureTime).Minutes}m"))
+            .ForMember(dest => dest.Route, opt => opt.MapFrom(src => src.Route));
+
 
         CreateMap<ScheduleResponseDTO, Schedule>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<ScheduleStatus>(src.Status)));
@@ -118,10 +120,11 @@ public class MappingProfile : Profile
         // -------------------- BOOKING CANCELLATIONS --------------------
         CreateMap<BookingCancellation, BookingCancellationDTO>().ReverseMap();
 
-
         // -------------------- PAYMENTS --------------------
         CreateMap<PaymentRequestDTO, Payment>()
-            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId));
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+            .ForMember(dest => dest.ProviderRef, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
         CreateMap<Payment, PaymentResponseDTO>().ReverseMap();
 
