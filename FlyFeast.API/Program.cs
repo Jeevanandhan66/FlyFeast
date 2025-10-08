@@ -4,6 +4,7 @@ using FlyFeast.API.Data.Repositories;
 using FlyFeast.API.Models;
 using FlyFeast.API.Repositories;
 using FlyFeast.API.Repositories.Interfaces;
+using FlyFeast.API.Services;
 using FlyFeast.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -84,7 +85,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 
 //Services
-builder.Services.AddScoped<IFlightSearchService, FlightSearchService>();
+builder.Services.AddScoped<IFlightSearchService,FlightSearchService>();
 
 // CORS Policy
 builder.Services.AddCors(options =>

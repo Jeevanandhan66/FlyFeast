@@ -6,6 +6,4 @@ namespace FlyFeast.API.Services.Interfaces
     {
         Task<List<Schedule>> SearchFlightsAsync(string originCity, string destinationCity, DateTime date);
     }
-
-
 }

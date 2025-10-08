@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
+using FlyFeast.API.DTOs.Aircraft_Airport;
 using FlyFeast.API.Models;
 using FlyFeast.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using FlyFeast.API.DTOs.Aircraft_Airport;
-
 
 namespace FlyFeast.API.Controllers
 {
@@ -22,13 +21,24 @@ namespace FlyFeast.API.Controllers
             _mapper = mapper;
         }
 
-  
         [HttpGet]
-        public async Task<IActionResult> GetAirports()
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAirports([FromQuery] string? search)
         {
             try
             {
                 var airports = await _airportRepository.GetAllAsync();
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    var lower = search.ToLower();
+                    airports = airports.Where(a =>
+                        a.City.ToLower().Contains(lower) ||
+                        a.Code.ToLower().Contains(lower) ||
+                        a.AirportName.ToLower().Contains(lower)
+                    ).ToList();
+                }
+
                 var dtos = _mapper.Map<List<AirportDTO>>(airports);
                 return Ok(dtos);
             }
@@ -38,7 +48,6 @@ namespace FlyFeast.API.Controllers
             }
         }
 
-      
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAirport(int id)
         {
@@ -56,7 +65,6 @@ namespace FlyFeast.API.Controllers
             }
         }
 
-       
         [HttpPost]
         public async Task<IActionResult> CreateAirport([FromBody] AirportDTO airportDto)
         {
@@ -74,7 +82,6 @@ namespace FlyFeast.API.Controllers
             }
         }
 
-        
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAirport(int id, [FromBody] AirportDTO airportDto)
         {
@@ -93,7 +100,6 @@ namespace FlyFeast.API.Controllers
             }
         }
 
-       
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAirport(int id)
         {

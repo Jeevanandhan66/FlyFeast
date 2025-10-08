@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using FlyFeast.API.DTOs.Schedules;
-using FlyFeast.API.Services;
 using FlyFeast.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +19,6 @@ namespace FlyFeast.API.Controllers
             _mapper = mapper;
         }
 
-
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> SearchFlights(
@@ -30,12 +28,16 @@ namespace FlyFeast.API.Controllers
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(originCity) || string.IsNullOrWhiteSpace(destinationCity))
+                    return BadRequest(new { message = "Origin and Destination are required." });
+
                 var schedules = await _flightSearchService.SearchFlightsAsync(originCity, destinationCity, date);
 
                 if (!schedules.Any())
                     return NotFound(new { message = "No flights available for the selected route and date." });
 
-                return Ok(_mapper.Map<List<ScheduleResponseDTO>>(schedules));
+                var dto = _mapper.Map<List<ScheduleResponseDTO>>(schedules);
+                return Ok(dto);
             }
             catch (Exception ex)
             {
