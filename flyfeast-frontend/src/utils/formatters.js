@@ -20,6 +20,8 @@ export function shortTimeFromIso(iso) {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+
+//Date and time
 export function formatIST(dateString) {
   if (!dateString) return "N/A";
   try {

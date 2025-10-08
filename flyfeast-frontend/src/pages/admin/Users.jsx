@@ -24,7 +24,7 @@ function initialForm() {
 }
 
 export default function Users() {
-  const toast = useToast(); // ✅ use success/error/info
+  const toast = useToast(); //
   const [list, setList] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -14,7 +14,7 @@ export default function UserLayout() {
             className="text-xl font-bold text-blue-600 cursor-pointer"
             onClick={() => navigate("/")}
           >
-            FlyFeast ✈️
+            FlyFeast
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             Welcome, {user?.fullName || "Guest"}
