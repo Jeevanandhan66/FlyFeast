@@ -78,8 +78,8 @@ namespace FlyFeast.API.Repositories
         // -------------------- CREATE --------------------
         public async Task<Booking> AddAsync(Booking booking)
         {
-            booking.BookingRef = $"BK-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
-            booking.CreatedAt = DateTime.UtcNow;
+            booking.BookingRef = $"BK-{DateTime.Now:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
+            booking.CreatedAt = DateTime.Now;
             booking.Status = BookingStatus.Pending;
 
             _context.Bookings.Add(booking);
@@ -89,8 +89,8 @@ namespace FlyFeast.API.Repositories
 
         public async Task<Booking> AddAsync(Booking booking, List<(int SeatId, int PassengerId)> seatPassengerPairs)
         {
-            booking.BookingRef = $"BK-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
-            booking.CreatedAt = DateTime.UtcNow;
+            booking.BookingRef = $"BK-{DateTime.Now:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
+            booking.CreatedAt = DateTime.Now;
 
             var schedule = await _context.Schedules
                 .Include(s => s.Seats)

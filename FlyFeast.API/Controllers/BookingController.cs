@@ -81,8 +81,8 @@ namespace FlyFeast.API.Controllers
                 {
                     UserId = bookingDto.UserId,
                     ScheduleId = bookingDto.ScheduleId,
-                    Status = BookingStatus.Pending, // always server-controlled
-                    CreatedAt = DateTime.UtcNow
+                    Status = BookingStatus.Pending,
+                    CreatedAt = DateTime.Now
                 };
 
                 var seatPassengerPairs = bookingDto.Seats
@@ -140,7 +140,7 @@ namespace FlyFeast.API.Controllers
                     BookingId = booking.BookingId,
                     CancelledById = cancellationDto.CancelledById ?? User.FindFirst("sub")?.Value ?? "system",
                     Reason = cancellationDto.Reason ?? "Cancelled by user",
-                    CancelledAt = DateTime.UtcNow
+                    CancelledAt = DateTime.Now
                 };
 
 

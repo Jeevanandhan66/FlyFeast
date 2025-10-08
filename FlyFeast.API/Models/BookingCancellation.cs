@@ -21,6 +21,6 @@ namespace FlyFeast.API.Models
         [StringLength(255)]
         public string? Reason { get; set; }
 
-        public DateTime CancelledAt { get; set; } = DateTime.UtcNow;
+        public DateTime CancelledAt { get; set; } = DateTime.Now;
     }
 }

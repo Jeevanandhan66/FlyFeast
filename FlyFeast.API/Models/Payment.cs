@@ -32,6 +32,6 @@ namespace FlyFeast.API.Models
         [RegularExpression("Initiated|Success|Failed")]
         public string Status { get; set; } = "Initiated";
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

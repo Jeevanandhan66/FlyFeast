@@ -27,7 +27,7 @@ namespace FlyFeast.API.Models
         [Required]
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Navigation properties
         public ICollection<BookingItem>? BookingItems { get; set; }
