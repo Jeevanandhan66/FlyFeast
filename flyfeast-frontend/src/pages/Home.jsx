@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "../assets/images/hero-bg.jpg";
 import AirportSearch from "../components/forms/AirportSearch";
+import { toast } from "react-toastify";
+
 
 export default function Home() {
   const navigate = useNavigate();
@@ -19,7 +21,6 @@ export default function Home() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // 👉 For now just navigate to /results with query params
     navigate(
       `/results?originCity=${formData.origin}&destinationCity=${formData.destination}&date=${formData.date}`
     );
@@ -49,7 +50,16 @@ export default function Home() {
         {/* Search Form */}
         <div className="relative z-20 max-w-4xl mx-auto px-4 pb-32">
           <form
-            onSubmit={handleSubmit}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!formData.origin || !formData.destination) {
+                toast.error(
+                  "Please select both Origin and Destination airports."
+                );
+                return;
+              }
+              handleSubmit(e);
+            }}
             className="bg-white shadow-2xl rounded-3xl p-6 md:p-8 grid grid-cols-1 md:grid-cols-4 gap-4 border-t-8 border-blue-600 relative overflow-hidden text-black"
           >
             {/* Decorative top notch / “ticket” look */}

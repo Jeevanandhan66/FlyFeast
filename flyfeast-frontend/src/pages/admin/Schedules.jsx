@@ -124,8 +124,8 @@ export default function Schedules() {
 
     const payload = {
       routeId: Number(form.routeId),
-      departureTime: new Date(form.departureTime).toISOString(),
-      arrivalTime: new Date(form.arrivalTime).toISOString(),
+      departureTime: form.departureTime + ":00",
+      arrivalTime: form.arrivalTime + ":00",
       seatCapacity: Number(form.seatCapacity),
       status: form.status,
     };
