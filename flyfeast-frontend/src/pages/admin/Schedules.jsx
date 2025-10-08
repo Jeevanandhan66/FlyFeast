@@ -56,7 +56,9 @@ export default function Schedules() {
       setList(schedulesData || []);
       setRoutes(routesData || []);
     } catch (e) {
-      setErr(e?.response?.data?.message || e?.message || "Failed to load schedules.");
+      setErr(
+        e?.response?.data?.message || e?.message || "Failed to load schedules."
+      );
     } finally {
       setLoading(false);
     }
@@ -98,13 +100,16 @@ export default function Schedules() {
   function validate() {
     const errors = {};
     if (!form.routeId) errors.routeId = "Route is required.";
-    if (!form.departureTime) errors.departureTime = "Departure time is required.";
+    if (!form.departureTime)
+      errors.departureTime = "Departure time is required.";
     if (!form.arrivalTime) errors.arrivalTime = "Arrival time is required.";
     if (new Date(form.arrivalTime) <= new Date(form.departureTime)) {
       errors.arrivalTime = "Arrival must be after departure.";
     }
-    if (!(Number(form.seatCapacity) > 0)) errors.seatCapacity = "Seats must be > 0.";
-    if (!STATUS_OPTIONS.includes(form.status)) errors.status = "Invalid status.";
+    if (!(Number(form.seatCapacity) > 0))
+      errors.seatCapacity = "Seats must be > 0.";
+    if (!STATUS_OPTIONS.includes(form.status))
+      errors.status = "Invalid status.";
     return errors;
   }
 
@@ -155,7 +160,7 @@ export default function Schedules() {
       const msg =
         e?.response?.data?.error || e?.message || "Failed to delete schedule.";
       setErr(msg);
-      toast.error(msg); 
+      toast.error(msg);
     }
   }
 
@@ -288,6 +293,7 @@ export default function Schedules() {
                   type="datetime-local"
                   name="departureTime"
                   value={form.departureTime}
+                  min={new Date().toISOString().slice(0, 16)}
                   onChange={onChange}
                   className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
                 />
@@ -307,6 +313,7 @@ export default function Schedules() {
                   type="datetime-local"
                   name="arrivalTime"
                   value={form.arrivalTime}
+                  min={new Date().toISOString().slice(0, 16)}
                   onChange={onChange}
                   className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
                 />

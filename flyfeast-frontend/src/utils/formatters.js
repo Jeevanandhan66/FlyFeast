@@ -19,3 +19,16 @@ export function shortTimeFromIso(iso) {
   const d = new Date(iso);
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
+
+export function formatIST(dateString) {
+  if (!dateString) return "N/A";
+  try {
+    return new Date(dateString).toLocaleString("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Kolkata",
+    });
+  } catch {
+    return dateString;
+  }
+}

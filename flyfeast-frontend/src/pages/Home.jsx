@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "../assets/images/hero-bg.jpg";
+import AirportSearch from "../components/forms/AirportSearch";
 
 export default function Home() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    origin: "Chennai",
-    destination: "Bengaluru",
+    origin: "",
+    destination: "",
     date: new Date().toISOString().split("T")[0],
     passengers: 1,
   });
@@ -20,16 +21,14 @@ export default function Home() {
     e.preventDefault();
     // 👉 For now just navigate to /results with query params
     navigate(
-  `/results?originCity=${formData.origin}&destinationCity=${formData.destination}&date=${formData.date}`
-);
-
+      `/results?originCity=${formData.origin}&destinationCity=${formData.destination}&date=${formData.date}`
+    );
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-blue-600 to-indigo-700 text-white min-h-[calc(100vh-4rem)] flex flex-col justify-between">
-
         <div className="absolute inset-0">
           <img
             src={heroImage}
@@ -38,7 +37,6 @@ export default function Home() {
           />
         </div>
         <div className="relative z-10 flex flex-col items-center justify-center text-center py-20 px-4">
-
           <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
             Fly high. Book fast. Feast easy
           </h1>
@@ -58,32 +56,22 @@ export default function Home() {
             <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-12 h-6 bg-gray-50 rounded-b-full shadow-md"></div>
 
             {/* Origin */}
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-black">Origin</label>
-              <input
-                type="text"
-                name="origin"
-                placeholder="e.g. Chennai"
-                value={formData.origin}
-                onChange={handleChange}
-                className="mt-2 w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 text-black placeholder-black shadow-sm"
-              />
-            </div>
+            <AirportSearch
+              label="Origin"
+              value={formData.origin}
+              onSelect={(airport) =>
+                setFormData((prev) => ({ ...prev, origin: airport.code }))
+              }
+            />
 
             {/* Destination */}
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-black">
-                Destination
-              </label>
-              <input
-                type="text"
-                name="destination"
-                placeholder="e.g. Delhi"
-                value={formData.destination}
-                onChange={handleChange}
-                className="mt-2 w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 text-black placeholder-black shadow-sm"
-              />
-            </div>
+            <AirportSearch
+              label="Destination"
+              value={formData.destination}
+              onSelect={(airport) =>
+                setFormData((prev) => ({ ...prev, destination: airport.code }))
+              }
+            />
 
             {/* Date */}
             <div className="flex flex-col">
@@ -91,6 +79,7 @@ export default function Home() {
               <input
                 type="date"
                 name="date"
+                min={new Date().toISOString().split("T")[0]}
                 value={formData.date}
                 onChange={handleChange}
                 className="mt-2 w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 text-black placeholder-black shadow-sm"

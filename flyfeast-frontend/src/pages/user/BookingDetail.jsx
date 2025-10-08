@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/apiClient";
 import { toast } from "react-toastify";
 import { useReactToPrint } from "react-to-print";
+import { formatIST } from "../../utils/formatters";
 
 export default function BookingDetail() {
   const { id } = useParams();
@@ -68,14 +69,7 @@ export default function BookingDetail() {
               </p>
 
               <p className="text-sm text-gray-500">Booked At</p>
-              <p>
-                {booking.createdAt
-                  ? new Date(booking.createdAt).toLocaleString("en-IN", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    })
-                  : "N/A"}
-              </p>
+              <p className="font-medium">{formatIST(booking.createdAt)}</p>
             </div>
 
             {/* Right Column - Flight Info */}
@@ -87,12 +81,13 @@ export default function BookingDetail() {
 
               <p className="text-sm text-gray-500">Departure</p>
               <p className="font-medium">
-                {new Date(
-                  booking.schedule?.departureTime
-                ).toLocaleString("en-IN", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })}
+                {new Date(booking.schedule?.departureTime).toLocaleString(
+                  "en-IN",
+                  {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  }
+                )}
               </p>
 
               <p className="text-sm text-gray-500">Arrival</p>
@@ -136,7 +131,9 @@ export default function BookingDetail() {
 
             {/* Seats */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-700 mb-2">Seats</h2>
+              <h2 className="text-lg font-semibold text-gray-700 mb-2">
+                Seats
+              </h2>
               <ul className="list-disc list-inside">
                 {booking.bookingItems?.map((item) => (
                   <li key={item.bookingItemId}>
@@ -150,7 +147,7 @@ export default function BookingDetail() {
 
           {/* Footer */}
           <div className="bg-blue-600 text-white px-6 py-2 text-center text-sm">
-            Thank you for choosing FlyFeast ✈️ — Have a pleasant journey!
+            Thank you for choosing FlyFeast ✈️ — Have a pleasant journey!!
           </div>
         </div>
 
