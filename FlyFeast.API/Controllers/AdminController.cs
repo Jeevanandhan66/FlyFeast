@@ -13,7 +13,7 @@ namespace FlyFeast.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Customer")]
     public class AdminController : ControllerBase
     {
         private readonly IAdminRepository _adminRepository;
@@ -34,7 +34,9 @@ namespace FlyFeast.API.Controllers
         }
 
         
+
         [HttpGet("users")]
+        [Authorize(Roles = "Admin,Customer")]
         public async Task<IActionResult> GetUsers()
         {
             try
@@ -144,6 +146,7 @@ namespace FlyFeast.API.Controllers
         }
 
         [HttpGet("roles")]
+        [Authorize(Roles = "Admin,Customer")]
         public async Task<IActionResult> GetRoles()
         {
             try
@@ -173,6 +176,7 @@ namespace FlyFeast.API.Controllers
         }
 
         [HttpGet("users/{userId}")]
+        [Authorize(Roles = "Admin,Customer")]
         public async Task<IActionResult> GetUserById(string userId)
         {
             var user = await _adminRepository.GetUserByIdAsync(userId);
@@ -181,6 +185,7 @@ namespace FlyFeast.API.Controllers
         }
 
         [HttpPut("users/{userId}")]
+        [Authorize(Roles = "Admin,Customer")]
         public async Task<IActionResult> UpdateUser(string userId, [FromBody] UserRequestDTO dto)
         {
             var existing = await _adminRepository.GetUserByIdAsync(userId);
