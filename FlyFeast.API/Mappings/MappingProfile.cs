@@ -102,12 +102,12 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
             .ForMember(dest => dest.Schedule, opt => opt.MapFrom(src => src.Schedule))
             .ForMember(dest => dest.BookingItems, opt => opt.MapFrom(src => src.BookingItems))
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))   
-            .ForMember(dest => dest.BookingRef, opt => opt.MapFrom(src => src.BookingRef)); 
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+            .ForMember(dest => dest.BookingRef, opt => opt.MapFrom(src => src.BookingRef));
 
         CreateMap<BookingRequestDTO, Booking>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<BookingStatus>(src.Status)))
-            .ForMember(dest => dest.BookingRef, opt => opt.Ignore()) 
+            .ForMember(dest => dest.BookingRef, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
 
         CreateMap<Booking, BookingRequestDTO>()

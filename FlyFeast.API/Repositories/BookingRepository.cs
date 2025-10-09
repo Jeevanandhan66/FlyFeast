@@ -184,28 +184,28 @@ namespace FlyFeast.API.Repositories
 
         // -------------------- SEAT RELEASE --------------------
         public async Task ReleaseSeatsAsync(int bookingId)
-{
-    var bookingItems = await _context.BookingItems
-        .Include(bi => bi.Seat)
-        .Where(bi => bi.BookingId == bookingId)
-        .ToListAsync();
+        {
+            var bookingItems = await _context.BookingItems
+                .Include(bi => bi.Seat)
+                .Where(bi => bi.BookingId == bookingId)
+                .ToListAsync();
 
-    foreach (var item in bookingItems)
-    {
-        if (item.Seat != null)
-            item.Seat.IsBooked = false;
-    }
+            foreach (var item in bookingItems)
+            {
+                if (item.Seat != null)
+                    item.Seat.IsBooked = false;
+            }
 
-    var schedule = await _context.Schedules
-        .Include(s => s.Seats)
-        .Where(s => s.Bookings.Any(b => b.BookingId == bookingId))
-        .FirstOrDefaultAsync();
+            var schedule = await _context.Schedules
+                .Include(s => s.Seats)
+                .Where(s => s.Bookings.Any(b => b.BookingId == bookingId))
+                .FirstOrDefaultAsync();
 
-    if (schedule != null && schedule.AvailableSeats.HasValue)
-        schedule.AvailableSeats += bookingItems.Count;
+            if (schedule != null && schedule.AvailableSeats.HasValue)
+                schedule.AvailableSeats += bookingItems.Count;
 
-    await _context.SaveChangesAsync();
-}
+            await _context.SaveChangesAsync();
+        }
 
     }
 }

@@ -39,6 +39,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 var jwtSection = configuration.GetSection("JwtSettings");
 var jwtSettings = jwtSection.Get<JwtSettings>();
 
+
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
