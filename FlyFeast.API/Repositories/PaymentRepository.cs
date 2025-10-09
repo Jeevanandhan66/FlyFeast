@@ -51,7 +51,7 @@ namespace FlyFeast.API.Repositories
 
         public async Task<Payment> AddAsync(Payment payment)
         {
-            payment.CreatedAt = DateTime.UtcNow;
+            payment.CreatedAt = DateTime.Now;
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
 
