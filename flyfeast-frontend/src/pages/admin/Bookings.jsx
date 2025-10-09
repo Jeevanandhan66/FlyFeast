@@ -79,10 +79,10 @@ export default function Bookings() {
   async function onStatusChange(id, newStatus) {
     setUpdatingId(id);
     try {
-      await updateBookingStatus(id, { status: newStatus });
+      await updateBookingStatus(id, { Status: newStatus });
       toast.success(`Booking marked as ${newStatus}`);
       await load();
-    } catch (e) {
+    } catch (e) {                   
       const msg =
         e?.response?.data?.error || e?.message || "Failed to update booking.";
       setErr(msg);

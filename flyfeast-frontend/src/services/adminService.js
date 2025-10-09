@@ -122,17 +122,23 @@ export async function getBookingById(id) {
 }
 
 export async function updateBookingStatus(id, payload) {
-  const { data } = await apiClient.put(ENDPOINTS.BOOKINGS.BY_ID(id), payload);
-  return data;
-}
-
-export async function cancelBooking(id, reason = "Cancelled by admin") {
-  const { data } = await apiClient.put(ENDPOINTS.BOOKINGS.CANCEL(id), {
-    cancelledById: "admin", // could be current user ID if needed
-    reason,
+  const { data } = await apiClient.put(ENDPOINTS.BOOKINGS.BY_ID(id), {
+    Status: payload.status || payload.Status,
   });
   return data;
 }
+
+
+export async function cancelBooking(id, reason = "Cancelled by admin") {
+  const { data } = await apiClient.put(ENDPOINTS.BOOKINGS.CANCEL(id), {
+    bookingId: id,
+    cancelledById: "admin",
+    reason,
+    cancelledAt: new Date().toISOString()
+  });
+  return data;
+}
+
 
 export async function deleteBooking(id) {
   await apiClient.delete(ENDPOINTS.BOOKINGS.BY_ID(id));
