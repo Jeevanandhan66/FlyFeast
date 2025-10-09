@@ -1,4 +1,3 @@
-// src/services/adminService.js
 import apiClient from "./apiClient";
 import { ENDPOINTS } from "./endpoints";
 

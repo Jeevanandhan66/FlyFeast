@@ -13,12 +13,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle errors globally
-// Handle errors globally
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // If it's a 401 but not from /Auth/login → force logout
     if (
       error.response?.status === 401 &&
       !error.config?.url.includes("/Auth/login")
