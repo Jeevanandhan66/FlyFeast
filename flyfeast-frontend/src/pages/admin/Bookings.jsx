@@ -76,22 +76,6 @@ export default function Bookings() {
     }
   }
 
-  async function onStatusChange(id, newStatus) {
-    setUpdatingId(id);
-    try {
-      await updateBookingStatus(id, { Status: newStatus });
-      toast.success(`Booking marked as ${newStatus}`);
-      await load();
-    } catch (e) {                   
-      const msg =
-        e?.response?.data?.error || e?.message || "Failed to update booking.";
-      setErr(msg);
-      toast.error(msg);
-    } finally {
-      setUpdatingId(null);
-    }
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -146,29 +130,14 @@ export default function Bookings() {
                     {b.schedule?.route?.originAirport?.code} →{" "}
                     {b.schedule?.route?.destinationAirport?.code}
                   </td>
-
                   <td className="px-4 py-2">
                     {new Date(b.schedule?.departureTime).toLocaleString()}
                   </td>
                   <td className="px-4 py-2">
                     {formatCurrency(b.totalAmount, "INR")}
                   </td>
-                  <td className="px-4 py-2">
-                    <select
-                      value={b.status}
-                      onChange={(e) =>
-                        onStatusChange(b.bookingId, e.target.value)
-                      }
-                      disabled={updatingId === b.bookingId}
-                      className="border rounded px-2 py-1 text-sm"
-                    >
-                      {STATUS_OPTIONS.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
+                  {/* Status as plain text */}
+                  <td className="px-4 py-2 font-medium">{b.status}</td>
                   <td className="px-4 py-2 text-right">
                     <button
                       onClick={() => onCancel(b.bookingId)}

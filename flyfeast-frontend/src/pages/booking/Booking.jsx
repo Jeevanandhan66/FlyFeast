@@ -4,7 +4,7 @@ import { getSeatsBySchedule } from "../../services/seatService";
 import { toast } from "react-toastify";
 
 export default function Booking() {
-  const { id } = useParams(); // scheduleId
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [seats, setSeats] = useState([]);
@@ -28,7 +28,7 @@ export default function Booking() {
   }, [id]);
 
   const toggleSeat = (seat) => {
-    if (seat.isBooked) return; // can't select booked seats
+    if (seat.isBooked) return;
     if (selectedSeats.find((s) => s.seatId === seat.seatId)) {
       setSelectedSeats(selectedSeats.filter((s) => s.seatId !== seat.seatId));
     } else {

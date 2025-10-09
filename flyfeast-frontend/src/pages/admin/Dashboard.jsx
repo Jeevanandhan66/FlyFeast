@@ -91,7 +91,7 @@ export default function Dashboard() {
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="bookings" fill="#6366F1" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="bookings" fill="#ff009dff" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
